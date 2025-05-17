@@ -77,6 +77,11 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         self.length == 0
     }
 
+    /// Adds a clone of the given value to the end of the vector.
+    ///
+    /// # Errors
+    ///
+    /// Returns an `Error("capacity")` if the vector is already at full capacity.
     pub fn push(&mut self, value: &T) -> Result<(), Error> {
         if self.length == CAPACITY {
             return Err(Error("capacity"));
@@ -247,6 +252,18 @@ mod tests {
 
         vec.push(&1).unwrap();
         assert_eq!(vec.capacity(), 3);
+    }
+
+    #[test]
+    fn push() {
+        let mut vec = StaticVector::<i32, 2>::new();
+        assert!(vec.push(&1).is_ok());
+        assert!(vec.push(&2).is_ok());
+        assert!(vec.push(&3).is_err());
+
+        assert_eq!(vec.get(0).unwrap(), &1);
+        assert_eq!(vec.get(1).unwrap(), &2);
+        assert!(vec.get(2).is_none());
     }
 
     #[test]
