@@ -65,9 +65,16 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         CAPACITY
     }
 
+    /// Returns the maximum number of elements the vector currenly contains.
     #[inline(always)]
     pub fn len(&self) -> usize {
         self.length
+    }
+
+    /// Returns whether the vector is empty or not.
+    #[inline(always)]
+    pub fn is_empty(&self) -> bool {
+        self.length == 0
     }
 
     pub fn push(&mut self, value: &T) -> Result<(), Error> {
@@ -112,11 +119,6 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
 
         self.length = new_length;
         Ok(())
-    }
-
-    #[inline(always)]
-    pub fn is_empty(&self) -> bool {
-        self.length == 0
     }
 
     #[must_use]
@@ -240,11 +242,31 @@ mod tests {
 
         assert_eq!(vec.capacity(), 3);
 
-        _ = vec.set_len(2);
+        vec.set_len(2).unwrap();
         assert_eq!(vec.capacity(), 3);
 
-        _ = vec.push(&1);
+        vec.push(&1).unwrap();
         assert_eq!(vec.capacity(), 3);
+    }
+
+    #[test]
+    fn sizing() {
+        let mut vec = StaticVector::<i32, 3>::new();
+        assert_eq!(vec.len(), 0);
+        assert!(vec.is_empty());
+
+        vec.push(&1).unwrap();
+        vec.push(&2).unwrap();
+        assert_eq!(vec.len(), 2);
+        assert!(!vec.is_empty());
+
+        vec.set_len(1).unwrap();
+        assert_eq!(vec.len(), 1);
+        assert!(!vec.is_empty());
+
+        vec.clear();
+        assert_eq!(vec.len(), 0);
+        assert!(vec.is_empty());
     }
 
     #[test]
