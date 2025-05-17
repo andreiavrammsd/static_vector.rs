@@ -12,15 +12,15 @@ pub struct StaticVector<T: Clone, const CAPACITY: usize> {
 
 impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
     fn default() -> Self {
-        let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
-        Self { data, length: 0 }
+        Self::new()
     }
 }
 
 impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     #[inline]
     pub fn new() -> Self {
-        Self::default()
+        let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
+        Self { data, length: 0 }
     }
 
     #[inline(always)]
@@ -185,6 +185,12 @@ mod tests {
     use std::string::{String, ToString};
     use std::vec;
     use std::vec::Vec;
+
+    #[test]
+    fn construct() {
+        assert!(StaticVector::<i32, 3>::new().is_empty());
+        assert!(StaticVector::<i32, 3>::default().is_empty());
+    }
 
     #[test]
     fn vector_set_len() {
