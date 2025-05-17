@@ -6,7 +6,7 @@
 
 A no-std, stack-allocated vector with fixed capacity and dynamic length.
 
-`StaticVector<T, CAPACITY>` stores elements on the stack using a fixed-size array without heap allocations.
+`StaticVector` stores elements on the stack using a fixed-size array without heap allocations.
 
 Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
 The goal is to allocate only when needed. When first constructed, the vector will not allocate.
@@ -17,12 +17,12 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 
 - No heap allocation (`#![no_std]` compatible)
 - Constant-time indexed access
-- Supports iteration, mutable access, clearing, and appending
+- Supports iteration, mutable access, clearing, resizing
 - Compile-time enforced capacity
 
 ## Requirements
 
-- `T: Clone` for insertion (e.g., `push`, `append`)
+- `T: Clone` for insertion: `push`
 - `T: Default` only if `set_len` is used
 - `CAPACITY > 0`
 
