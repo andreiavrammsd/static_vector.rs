@@ -1,0 +1,5 @@
+max_width = 100
+hard_tabs = false
+use_small_heuristics = "Max"
+newline_style = "Unix"
+match_block_trailing_comma = true

@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    fmt:
+      run: cargo fmt --all -- --check || (cargo fmt --all && exit 1)
+    lint:
+      run: cargo clippy --all-targets --all-features
+    test:
+      run: cargo test

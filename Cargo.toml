@@ -1,0 +1,26 @@
+[package]
+name = "static_vector"
+version = "0.1.0"
+edition = "2024"
+description = "Vector with static allocation"
+repository = "https://github.com/andreiavrammsd/static_vector.rs"
+readme = "README.md"
+license = "MIT"
+keywords = ["vector"]
+categories = ["data-structures"]
+publish = false
+
+[profile.dev]
+overflow-checks = true
+lto = false
+panic = "unwind"
+opt-level = 0
+
+[profile.release]
+overflow-checks = true
+lto = "thin"
+panic = "abort"
+opt-level = "z"
+
+[lints.rust]
+unsafe_code = "allow"
