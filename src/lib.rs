@@ -17,8 +17,11 @@ impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
 }
 
 impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
+    const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
+
     #[inline]
     pub fn new() -> Self {
+        let () = Self::ASSERT_CAPACITY;
         let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
         Self { data, length: 0 }
     }
@@ -190,6 +193,9 @@ mod tests {
     fn construct() {
         assert!(StaticVector::<i32, 3>::new().is_empty());
         assert!(StaticVector::<i32, 3>::default().is_empty());
+
+        // Will not build because CAPACITY must be greater than zero
+        // StaticVector::<i32, 0>::new().is_empty();
     }
 
     #[test]
