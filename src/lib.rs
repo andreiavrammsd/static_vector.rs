@@ -1,4 +1,6 @@
-use std::{borrow::Borrow, mem::MaybeUninit};
+#![no_std]
+
+use core::{array, borrow::Borrow, mem::MaybeUninit, ptr};
 
 #[derive(Debug)]
 pub struct Error(pub &'static str);
@@ -10,7 +12,7 @@ pub struct StaticVector<T: Clone, const CAPACITY: usize> {
 
 impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
     fn default() -> Self {
-        let data: [MaybeUninit<T>; CAPACITY] = std::array::from_fn(|_| MaybeUninit::uninit());
+        let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
         Self { data, length: 0 }
     }
 }
@@ -74,7 +76,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         } else {
             for i in new_length..self.length {
                 unsafe {
-                    std::ptr::drop_in_place(self.data[i].as_mut_ptr());
+                    ptr::drop_in_place(self.data[i].as_mut_ptr());
                 }
             }
         }
@@ -129,7 +131,7 @@ impl<T: Clone, const CAPACITY: usize> Drop for StaticVector<T, CAPACITY> {
     fn drop(&mut self) {
         for i in 0..self.length {
             unsafe {
-                std::ptr::drop_in_place(self.data[i].as_mut_ptr());
+                ptr::drop_in_place(self.data[i].as_mut_ptr());
             }
         }
     }
@@ -180,6 +182,11 @@ impl<'a, T> Iterator for StaticVectorMutableIterator<'a, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    extern crate std;
+    use std::string::{String, ToString};
+    use std::vec;
+    use std::vec::Vec;
 
     #[test]
     #[cfg(debug_assertions)]
