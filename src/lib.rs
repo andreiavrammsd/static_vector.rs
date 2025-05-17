@@ -90,24 +90,24 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         self.length == 0
     }
 
-    #[must_use = "must check"]
+    #[must_use]
     #[inline]
     pub fn first(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
     }
 
-    #[must_use = "must check"]
+    #[must_use]
     #[inline]
     pub fn last(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
     }
 
-    #[must_use = "must check"]
+    #[must_use]
     pub fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
 
-    #[must_use = "must check"]
+    #[must_use]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
             None
