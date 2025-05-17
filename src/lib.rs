@@ -1,16 +1,48 @@
+//! A no-std, stack-allocated vector with fixed capacity and dynamic length.
+//!
+//! `StaticVector<T, CAPACITY>` stores elements on the stack using a fixed-size array
+//! without heap allocations. Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
+//! It's a learning project, so there are no guarantees.
+//!
+//! # Features
+//! - No heap allocation (`#![no_std]` compatible)
+//! - Constant-time indexed access
+//! - Supports iteration, mutable access, clearing, and appending
+//! - Compile-time enforced capacity
+//!
+//! # Requirements
+//! - `T: Clone` for insertion (e.g., `push`, `append`)
+//! - `T: Default` only if `set_len` is used
+//! - `CAPACITY > 0`
+//!
+//! # Example
+//! ```rust
+//! use static_vector::StaticVector;
+//!
+//! let mut vec = StaticVector::<i32, 4>::new();
+//! vec.push(&1).unwrap();
+//! vec.push(&2).unwrap();
+//! assert_eq!(vec.len(), 2);
+//! ```
+
 #![no_std]
 
 use core::{array, borrow::Borrow, mem::MaybeUninit, ptr};
 
+/// Error type returned by `StaticVector`.
 #[derive(Debug)]
 pub struct Error(pub &'static str);
 
+/// A stack-allocated vector with fixed capacity and dynamic length.
+///
+/// See crate-level documentation for details and usage.
 pub struct StaticVector<T: Clone, const CAPACITY: usize> {
     data: [MaybeUninit<T>; CAPACITY],
     length: usize,
 }
 
 impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
+    /// Creates an empty `StaticVector`. Equivalent to `StaticVector::new()`.
     fn default() -> Self {
         Self::new()
     }
@@ -19,6 +51,7 @@ impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
 impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
 
+    /// Creates a new empty `StaticVector` with maximum `CAPACITY` elements of type `T`.
     #[inline]
     pub fn new() -> Self {
         let () = Self::ASSERT_CAPACITY;
@@ -27,8 +60,6 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector can contain.
-    ///
-    /// The capacity is set by the generic parameter `CAPACITY`.
     #[inline(always)]
     pub fn capacity(&self) -> usize {
         CAPACITY
@@ -58,11 +89,9 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         iter.into_iter().try_for_each(|value| self.push(value.borrow()))
     }
 
-    pub fn clear(&mut self)
-    where
-        T: Default,
-    {
-        self.set_len(0).unwrap()
+    pub fn clear(&mut self) {
+        self.drop(0, self.length);
+        self.length = 0
     }
 
     pub fn set_len(&mut self, new_length: usize) -> Result<(), Error>
@@ -78,11 +107,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
                 self.data[i].write(T::default());
             }
         } else {
-            for i in new_length..self.length {
-                unsafe {
-                    ptr::drop_in_place(self.data[i].as_mut_ptr());
-                }
-            }
+            self.drop(new_length, self.length);
         }
 
         self.length = new_length;
@@ -128,6 +153,14 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     #[inline(always)]
     pub fn iter_mut(&mut self) -> StaticVectorMutableIterator<T> {
         StaticVectorMutableIterator { data: &mut self.data, size: self.length, index: 0 }
+    }
+
+    fn drop(&mut self, from: usize, to: usize) {
+        for i in from..to {
+            unsafe {
+                ptr::drop_in_place(self.data[i].as_mut_ptr());
+            }
+        }
     }
 }
 
@@ -291,6 +324,20 @@ mod tests {
 
             pages.clear();
             assert!(pages.is_empty());
+        }
+
+        {
+            #[derive(Clone)]
+            struct Page {
+                data: Vec<String>,
+            }
+            let mut pages = StaticVector::<Page, 4>::new();
+
+            pages.push(&Page { data: vec!["a".to_string()] }).unwrap();
+            pages.push(&Page { data: vec!["bc".to_string()] }).unwrap();
+
+            let _ = pages.first().unwrap().data;
+            pages.clear();
         }
 
         {
