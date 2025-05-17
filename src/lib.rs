@@ -63,8 +63,6 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     where
         T: Default,
     {
-        debug_assert!(new_length <= CAPACITY);
-
         if new_length > CAPACITY {
             return Err(Error("new length > capacity"));
         }
@@ -189,11 +187,9 @@ mod tests {
     use std::vec::Vec;
 
     #[test]
-    #[cfg(debug_assertions)]
-    #[should_panic]
     fn vector_set_len() {
         let mut vec = StaticVector::<i32, 3>::new();
-        let _ = vec.set_len(100).is_err();
+        assert!(vec.set_len(100).is_err());
     }
 
     #[test]
