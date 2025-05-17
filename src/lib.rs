@@ -1,7 +1,10 @@
 //! A no-std, stack-allocated vector with fixed capacity and dynamic length.
 //!
-//! `StaticVector<T, CAPACITY>` stores elements on the stack using a fixed-size array
-//! without heap allocations. Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
+//! `StaticVector<T, CAPACITY>` stores elements on the stack using a fixed-size array without heap allocations.
+//!
+//! Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
+//! The goal is to allocate only when needed. When first constructed, the vector will not allocate.
+//!
 //! It's a learning project, so there are no guarantees.
 //!
 //! # Features
