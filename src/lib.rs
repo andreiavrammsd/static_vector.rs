@@ -1,6 +1,6 @@
 //! A no-std, stack-allocated vector with fixed capacity and dynamic length.
 //!
-//! `StaticVector<T, CAPACITY>` stores elements on the stack using a fixed-size array without heap allocations.
+//! [`StaticVector`] stores elements on the stack using a fixed-size array without heap allocations.
 //!
 //! Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
 //! The goal is to allocate only when needed. When first constructed, the vector will not allocate.
@@ -10,12 +10,12 @@
 //! # Features
 //! - No heap allocation (`#![no_std]` compatible)
 //! - Constant-time indexed access
-//! - Supports iteration, mutable access, clearing, and appending
+//! - Supports iteration, mutable access, clearing, resizing
 //! - Compile-time enforced capacity
 //!
 //! # Requirements
-//! - `T: Clone` for insertion (e.g., `push`, `append`)
-//! - `T: Default` only if `set_len` is used
+//! - `T: Clone` for insertion: [`StaticVector::push()`]
+//! - `T: Default` only if [`StaticVector::set_len()`] is used
 //! - `CAPACITY > 0`
 //!
 //! # Example
@@ -29,10 +29,11 @@
 //! ```
 
 #![no_std]
+#![deny(missing_docs)]
 
-use core::{array, borrow::Borrow, mem::MaybeUninit};
+use core::{array, mem::MaybeUninit};
 
-/// Error type returned by `StaticVector`.
+/// Error type returned by [`StaticVector`].
 #[derive(Debug)]
 pub struct Error(pub &'static str);
 
@@ -45,7 +46,7 @@ pub struct StaticVector<T: Clone, const CAPACITY: usize> {
 }
 
 impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
-    /// Creates an empty `StaticVector`. Equivalent to `StaticVector::new()`.
+    /// Creates an empty [`StaticVector`]. Equivalent to [`StaticVector::new()`].
     fn default() -> Self {
         Self::new()
     }
@@ -54,7 +55,7 @@ impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
 impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
 
-    /// Creates a new empty `StaticVector` with maximum `CAPACITY` elements of type `T`.
+    /// Creates a new empty [`StaticVector`] with maximum `CAPACITY` elements of type `T`.
     #[inline]
     pub fn new() -> Self {
         let () = Self::ASSERT_CAPACITY;
@@ -84,7 +85,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`](`crate::Error`) if the vector is already at full capacity.
+    /// Returns [`Error`] if the vector is already at full capacity.
     pub fn push(&mut self, value: &T) -> Result<(), Error> {
         if self.length == CAPACITY {
             return Err(Error("capacity"));
@@ -94,14 +95,6 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         self.length += 1;
 
         Ok(())
-    }
-
-    pub fn append<I>(&mut self, iter: I) -> Result<(), Error>
-    where
-        I: IntoIterator,
-        I::Item: Borrow<T>,
-    {
-        iter.into_iter().try_for_each(|value| self.push(value.borrow()))
     }
 
     /// Removes all elements. Size will be zero.
@@ -119,7 +112,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`](`crate::Error`) if `new_length` exceeds the vector's fixed capacity.
+    /// Returns [`Error`] if `new_length` exceeds the vector's fixed capacity.
     pub fn set_len(&mut self, new_length: usize) -> Result<(), Error>
     where
         T: Default,
@@ -170,11 +163,13 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         }
     }
 
+    /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter(&self) -> StaticVectorIterator<T> {
         StaticVectorIterator { data: &self.data, size: self.length, index: 0 }
     }
 
+    /// Returns an iterator over mutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter_mut(&mut self) -> StaticVectorMutableIterator<T> {
         StaticVectorMutableIterator { data: &mut self.data, size: self.length, index: 0 }
@@ -195,6 +190,9 @@ impl<T: Clone, const CAPACITY: usize> Drop for StaticVector<T, CAPACITY> {
     }
 }
 
+/// Immutable iterator over a [`StaticVector`].
+///
+/// Created by calling [`StaticVector::iter()`].
 #[must_use = "must consume iterator"]
 pub struct StaticVectorIterator<'a, T> {
     data: &'a [MaybeUninit<T>],
@@ -216,6 +214,9 @@ impl<'a, T> Iterator for StaticVectorIterator<'a, T> {
     }
 }
 
+/// Mutable iterator over a [`StaticVector`].
+///
+/// Created by calling [`StaticVector::iter_mut()`].
 #[must_use = "must consume iterator"]
 pub struct StaticVectorMutableIterator<'a, T> {
     data: &'a mut [MaybeUninit<T>],
@@ -323,5 +324,27 @@ mod tests {
         assert_eq!(vec.get(0).unwrap(), &5);
         assert_eq!(vec.get_mut(0).unwrap(), &5);
         assert!(vec.get_mut(3).is_none());
+    }
+
+    #[test]
+    fn iter() {
+        let mut vec = StaticVector::<i32, 10>::new();
+        for i in 1..8 {
+            vec.push(&i).unwrap()
+        }
+
+        let even_sum = vec.iter().filter(|v| *v % 2 == 0).sum::<i32>();
+        assert_eq!(even_sum, 12);
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut vec = StaticVector::<i32, 10>::new();
+        for i in 1..8 {
+            vec.push(&i).unwrap()
+        }
+
+        let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
+        assert_eq!(even_sum, 12);
     }
 }
