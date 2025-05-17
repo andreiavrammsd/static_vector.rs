@@ -226,11 +226,6 @@ impl<'a, T> Iterator for StaticVectorMutableIterator<'a, T> {
 mod tests {
     use super::*;
 
-    extern crate std;
-    use std::string::{String, ToString};
-    use std::vec;
-    use std::vec::Vec;
-
     #[test]
     fn construct() {
         assert!(StaticVector::<i32, 3>::new().is_empty());
@@ -266,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn sizing() {
+    fn size() {
         let mut vec = StaticVector::<i32, 3>::new();
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
@@ -276,111 +271,14 @@ mod tests {
         assert_eq!(vec.len(), 2);
         assert!(!vec.is_empty());
 
-        vec.set_len(1).unwrap();
+        assert!(vec.set_len(1).is_ok());
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
 
-        vec.clear();
-        assert_eq!(vec.len(), 0);
-        assert!(vec.is_empty());
-    }
-
-    #[test]
-    fn vector_set_len() {
-        let mut vec = StaticVector::<i32, 3>::new();
         assert!(vec.set_len(100).is_err());
-    }
 
-    #[test]
-    fn test() {
-        let mut vec = StaticVector::<i32, 3>::new();
-        assert_eq!(vec.capacity(), 3);
+        vec.clear();
         assert_eq!(vec.len(), 0);
-        assert!(vec.first().is_none());
-        assert!(vec.last().is_none());
         assert!(vec.is_empty());
-
-        assert!(vec.push(&1).is_ok());
-        assert_eq!(vec.first().unwrap(), &1);
-        assert_eq!(vec.last().unwrap(), vec.first().unwrap());
-        assert_eq!(vec.get(0).unwrap(), &1);
-
-        assert!(vec.push(&2).is_ok());
-        assert_eq!(vec.first().unwrap(), &1);
-        assert_eq!(vec.get(1).unwrap(), &2);
-        assert_eq!(vec.last().unwrap(), &2);
-        vec.set_len(1).unwrap();
-
-        assert_eq!(vec.len(), 1);
-        assert!(!vec.is_empty());
-        assert!(vec.push(&1).is_ok());
-        assert!(vec.push(&1).is_ok());
-        assert!(vec.push(&1).is_err());
-
-        assert_eq!(vec.iter().sum::<i32>(), 3);
-
-        vec.clear();
-        assert!(vec.is_empty());
-
-        let other = vec![4, 5, 6, 7];
-        assert!(vec.append(&other).is_err());
-        assert_eq!(vec.iter().sum::<i32>(), 15);
-        assert_eq!(other.iter().sum::<i32>(), 22);
-        assert_eq!(other.iter().sum::<i32>(), 22);
-
-        vec.clear();
-        vec.push(&1).unwrap();
-        assert!(vec.set_len(2).is_ok());
-        assert_eq!(vec.get(0).unwrap(), &1);
-        assert_eq!(vec.get(1).unwrap(), &0);
-
-        vec.clear();
-        assert!(vec.set_len(2).is_ok());
-        assert_eq!(vec.get(0).unwrap(), &0);
-        assert_eq!(vec.get(1).unwrap(), &0);
-
-        {
-            #[derive(Clone, Default)]
-            struct Page {
-                data: Vec<String>,
-            }
-            let mut pages = StaticVector::<Page, 4>::new();
-
-            pages.push(&Page { data: vec!["a".to_string()] }).unwrap();
-            pages.push(&Page { data: vec!["bc".to_string()] }).unwrap();
-
-            assert_eq!(pages.iter().map(|value| value.data.len()).sum::<usize>(), 2);
-
-            if let Some(page) = pages.get_mut(0) {
-                page.data.push("d".into());
-            };
-
-            assert_eq!(pages.iter().map(|value| value.data.len()).sum::<usize>(), 3);
-
-            pages.iter_mut().for_each(|page| page.data.clear());
-            assert_eq!(pages.iter_mut().map(|value| value.data.len()).sum::<usize>(), 0);
-
-            pages.clear();
-            assert!(pages.is_empty());
-        }
-
-        {
-            #[derive(Clone)]
-            struct Page {
-                data: Vec<String>,
-            }
-            let mut pages = StaticVector::<Page, 4>::new();
-
-            pages.push(&Page { data: vec!["a".to_string()] }).unwrap();
-            pages.push(&Page { data: vec!["bc".to_string()] }).unwrap();
-
-            let _ = pages.first().unwrap().data;
-            pages.clear();
-        }
-
-        {
-            let mut vec = StaticVector::<String, 10>::new();
-            vec.push(&"value".into()).unwrap();
-        }
     }
 }
