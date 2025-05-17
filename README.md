@@ -2,6 +2,7 @@
 
 [![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/andreiavrammsd/static_vector.rs/workflows/CI/badge.svg)](https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/andreiavrammsd/static_vector.rs/graph/badge.svg?token=pCcpya0mZC)](https://codecov.io/gh/andreiavrammsd/static_vector.rs)
 
 A no-std, stack-allocated vector with fixed capacity and dynamic length.
 
