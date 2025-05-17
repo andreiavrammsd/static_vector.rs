@@ -80,11 +80,11 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         self.length == 0
     }
 
-    /// Adds a clone of the given value to the end of the vector.
+    /// Adds a clone of the given `value` to the end of the vector.
     ///
     /// # Errors
     ///
-    /// Returns an `Error("capacity")` if the vector is already at full capacity.
+    /// Returns [`Error`](`crate::Error`) if the vector is already at full capacity.
     pub fn push(&mut self, value: &T) -> Result<(), Error> {
         if self.length == CAPACITY {
             return Err(Error("capacity"));
@@ -104,11 +104,22 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         iter.into_iter().try_for_each(|value| self.push(value.borrow()))
     }
 
+    /// Removes all elements. Size will be zero.
     pub fn clear(&mut self) {
         self.drop(0, self.length);
         self.length = 0
     }
 
+    /// Resizes the vector to the `new_length`.
+    ///
+    /// # Requirements
+    ///
+    /// - `T` must implement `Default` because new elements are created with `T::default()`
+    ///   when increasing the length.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error`](`crate::Error`) if `new_length` exceeds the vector's fixed capacity.
     pub fn set_len(&mut self, new_length: usize) -> Result<(), Error>
     where
         T: Default,
@@ -129,23 +140,27 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         Ok(())
     }
 
+    /// Returns a reference to the first element in the vector, or `None` if the vector is empty.
     #[must_use]
     #[inline]
     pub fn first(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
     }
 
+    /// Returns a reference to the last element in the vector, or `None` if the vector is empty.
     #[must_use]
     #[inline]
     pub fn last(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
     }
 
+    /// Returns a reference to the element at the specified `index`, or `None` if out of bounds.
     #[must_use]
     pub fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
 
+    /// Returns a mutable reference to the element at the specified `index`, or `None` if out of bounds.
     #[must_use]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
@@ -280,5 +295,33 @@ mod tests {
         vec.clear();
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
+    }
+
+    #[test]
+    fn get() {
+        let mut vec = StaticVector::<i32, 4>::new();
+        assert!(vec.first().is_none());
+        assert!(vec.last().is_none());
+        assert!(vec.get(0).is_none());
+
+        vec.push(&1).unwrap();
+        assert_eq!(vec.first().unwrap(), &1);
+        assert_eq!(vec.get(0).unwrap(), &1);
+        assert_eq!(vec.last().unwrap(), &1);
+
+        vec.push(&2).unwrap();
+        vec.push(&3).unwrap();
+        assert_eq!(vec.first().unwrap(), &1);
+        assert_eq!(vec.last().unwrap(), &3);
+        assert_eq!(vec.get(0).unwrap(), &1);
+        assert_eq!(vec.get(1).unwrap(), &2);
+        assert_eq!(vec.get(2).unwrap(), &3);
+        assert!(vec.get(3).is_none());
+
+        assert_eq!(vec.get_mut(0).unwrap(), &1);
+        *vec.get_mut(0).unwrap() = 5;
+        assert_eq!(vec.get(0).unwrap(), &5);
+        assert_eq!(vec.get_mut(0).unwrap(), &5);
+        assert!(vec.get_mut(3).is_none());
     }
 }
