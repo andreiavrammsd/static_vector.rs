@@ -1,5 +1,5 @@
 # Static Vector
 
-## Development
+## Development on Linux
 
 See [Makefile](Makefile).

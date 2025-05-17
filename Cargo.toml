@@ -24,3 +24,10 @@ opt-level = "z"
 
 [lints.rust]
 unsafe_code = "allow"
+
+[dev-dependencies]
+criterion = "0.6.0"
+
+[[bench]]
+name = "static_vector"
+harness = false
