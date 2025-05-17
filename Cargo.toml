@@ -2,7 +2,7 @@
 name = "static_vector"
 version = "0.1.0"
 edition = "2024"
-description = "Vector with static allocation"
+description = "A no-std, stack-allocated vector with fixed capacity and dynamic length"
 repository = "https://github.com/andreiavrammsd/static_vector.rs"
 readme = "README.md"
 license = "MIT"
