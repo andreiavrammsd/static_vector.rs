@@ -26,6 +26,9 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
         Self { data, length: 0 }
     }
 
+    /// Returns the maximum number of elements the vector can contain.
+    ///
+    /// The capacity is set by the generic parameter `CAPACITY`.
     #[inline(always)]
     pub fn capacity(&self) -> usize {
         CAPACITY
@@ -196,6 +199,19 @@ mod tests {
 
         // Will not build because CAPACITY must be greater than zero
         // StaticVector::<i32, 0>::new().is_empty();
+    }
+
+    #[test]
+    fn capacity() {
+        let mut vec = StaticVector::<i32, 3>::new();
+
+        assert_eq!(vec.capacity(), 3);
+
+        _ = vec.set_len(2);
+        assert_eq!(vec.capacity(), 3);
+
+        _ = vec.push(&1);
+        assert_eq!(vec.capacity(), 3);
     }
 
     #[test]
