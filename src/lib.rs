@@ -27,7 +27,7 @@
 
 #![no_std]
 
-use core::{array, borrow::Borrow, mem::MaybeUninit, ptr};
+use core::{array, borrow::Borrow, mem::MaybeUninit};
 
 /// Error type returned by `StaticVector`.
 #[derive(Debug)]
@@ -165,7 +165,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     fn drop(&mut self, from: usize, to: usize) {
         for i in from..to {
             unsafe {
-                ptr::drop_in_place(self.data[i].as_mut_ptr());
+                self.data[i].as_mut_ptr().drop_in_place();
             }
         }
     }
@@ -173,11 +173,7 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
 
 impl<T: Clone, const CAPACITY: usize> Drop for StaticVector<T, CAPACITY> {
     fn drop(&mut self) {
-        for i in 0..self.length {
-            unsafe {
-                ptr::drop_in_place(self.data[i].as_mut_ptr());
-            }
-        }
+        self.drop(0, self.length);
     }
 }
 
