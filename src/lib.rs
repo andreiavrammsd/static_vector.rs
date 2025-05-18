@@ -356,17 +356,24 @@ mod tests {
         assert_eq!(even_sum, 12);
     }
 
-    #[derive(Clone)]
     struct Struct {}
 
     thread_local! {
         static DEFAULTS: Cell<usize> = const {Cell::new(0)};
+        static CLONES: Cell<usize> = const {Cell::new(0)};
         static DROPS: Cell<usize> = const {Cell::new(0)};
     }
 
     impl Default for Struct {
         fn default() -> Self {
             DEFAULTS.set(DEFAULTS.get() + 1);
+            Self {}
+        }
+    }
+
+    impl Clone for Struct {
+        fn clone(&self) -> Self {
+            CLONES.set(CLONES.get() + 1);
             Self {}
         }
     }
@@ -415,6 +422,18 @@ mod tests {
         DEFAULTS.set(0);
         vec.set_len(8).unwrap();
         assert_eq!(DEFAULTS.get(), 3);
+    }
+
+    #[test]
+    fn push_should_clone_element() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(CLONES.get(), 1);
+
+        vec.push(&Struct {}).unwrap();
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(CLONES.get(), 3);
     }
 
     #[test]
