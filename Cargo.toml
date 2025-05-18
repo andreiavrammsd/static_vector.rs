@@ -24,6 +24,7 @@ opt-level = "z"
 
 [lints.rust]
 unsafe_code = "allow"
+elided_lifetimes_in_paths = "forbid"
 
 [lints.clippy]
 wildcard_imports = "forbid"
