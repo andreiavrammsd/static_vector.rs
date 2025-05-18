@@ -33,22 +33,22 @@ impl core::error::Error for LengthTooLargeError {}
 /// A stack-allocated vector with fixed capacity and dynamic length.
 ///
 /// See crate-level documentation for details and usage.
-pub struct StaticVector<T: Clone, const CAPACITY: usize> {
+pub struct Vec<T: Clone, const CAPACITY: usize> {
     data: [MaybeUninit<T>; CAPACITY],
     length: usize,
 }
 
-impl<T: Clone, const CAPACITY: usize> Default for StaticVector<T, CAPACITY> {
-    /// Creates an empty [`StaticVector`]. Equivalent to [`StaticVector::new()`].
+impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
+    /// Creates an empty [`Vec`]. Equivalent to [`Vec::new()`].
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
+impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
 
-    /// Creates a new empty [`StaticVector`] with maximum `CAPACITY` elements of type `T`.
+    /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
     #[inline]
     pub fn new() -> Self {
         let () = Self::ASSERT_CAPACITY;
@@ -177,15 +177,15 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     }
 }
 
-impl<T: Clone, const CAPACITY: usize> Drop for StaticVector<T, CAPACITY> {
+impl<T: Clone, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
     fn drop(&mut self) {
         self.drop(0, self.length);
     }
 }
 
-/// Immutable iterator over a [`StaticVector`].
+/// Immutable iterator over a [`Vec`].
 ///
-/// Created by calling [`StaticVector::iter()`].
+/// Created by calling [`Vec::iter()`].
 #[must_use = "must consume iterator"]
 pub struct StaticVectorIterator<'a, T> {
     data: &'a [MaybeUninit<T>],
@@ -207,9 +207,9 @@ impl<'a, T> Iterator for StaticVectorIterator<'a, T> {
     }
 }
 
-/// Mutable iterator over a [`StaticVector`].
+/// Mutable iterator over a [`Vec`].
 ///
-/// Created by calling [`StaticVector::iter_mut()`].
+/// Created by calling [`Vec::iter_mut()`].
 #[must_use = "must consume iterator"]
 pub struct StaticVectorMutableIterator<'a, T> {
     data: &'a mut [MaybeUninit<T>],
@@ -240,16 +240,16 @@ mod tests {
 
     #[test]
     fn construct() {
-        assert!(StaticVector::<i32, 3>::new().is_empty());
-        assert!(StaticVector::<i32, 3>::default().is_empty());
+        assert!(Vec::<i32, 3>::new().is_empty());
+        assert!(Vec::<i32, 3>::default().is_empty());
 
         // Will not build because CAPACITY must be greater than zero
-        // StaticVector::<i32, 0>::new().is_empty();
+        // Vec::<i32, 0>::new().is_empty();
     }
 
     #[test]
     fn capacity() {
-        let mut vec = StaticVector::<i32, 3>::new();
+        let mut vec = Vec::<i32, 3>::new();
 
         assert_eq!(vec.capacity(), 3);
 
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn push() {
-        let mut vec = StaticVector::<i32, 2>::new();
+        let mut vec = Vec::<i32, 2>::new();
         assert!(vec.push(&1).is_ok());
         assert!(vec.push(&2).is_ok());
         assert!(matches!(vec.push(&3), Err(CapacityExceededError)));
@@ -274,7 +274,7 @@ mod tests {
 
     #[test]
     fn size() {
-        let mut vec = StaticVector::<i32, 3>::new();
+        let mut vec = Vec::<i32, 3>::new();
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
 
@@ -296,7 +296,7 @@ mod tests {
 
     #[test]
     fn get() {
-        let mut vec = StaticVector::<i32, 4>::new();
+        let mut vec = Vec::<i32, 4>::new();
         assert!(vec.first().is_none());
         assert!(vec.last().is_none());
         assert!(vec.get(0).is_none());
@@ -324,7 +324,7 @@ mod tests {
 
     #[test]
     fn iter() {
-        let mut vec = StaticVector::<i32, 10>::new();
+        let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
             vec.push(&i).unwrap()
         }
@@ -335,7 +335,7 @@ mod tests {
 
     #[test]
     fn iter_mut() {
-        let mut vec = StaticVector::<i32, 10>::new();
+        let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
             vec.push(&i).unwrap()
         }
@@ -374,20 +374,20 @@ mod tests {
 
     #[test]
     fn construct_should_not_create_default_elements() {
-        let _ = StaticVector::<Struct, 10>::new();
+        let _ = Vec::<Struct, 10>::new();
         assert_eq!(DEFAULTS.get(), 0);
     }
 
     #[test]
     fn push_should_not_create_default_elements() {
-        let mut vec = StaticVector::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
         vec.push(&Struct {}).unwrap();
         assert_eq!(DEFAULTS.get(), 0);
     }
 
     #[test]
     fn set_len_should_create_default_elements() {
-        let mut vec = StaticVector::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
 
         // Length zero, no defaults
         vec.set_len(0).unwrap();
@@ -414,7 +414,7 @@ mod tests {
 
     #[test]
     fn push_should_clone_element() {
-        let mut vec = StaticVector::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
 
         vec.push(&Struct {}).unwrap();
         assert_eq!(CLONES.get(), 1);
@@ -426,7 +426,7 @@ mod tests {
 
     #[test]
     fn clear_should_drop_all_allocated_elements() {
-        let mut vec = StaticVector::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
         assert_eq!(DROPS.get(), 0);
 
         let s = Struct::default();
@@ -441,7 +441,7 @@ mod tests {
 
     #[test]
     fn set_len_should_drop_all_allocated_elements() {
-        let mut vec = StaticVector::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
         assert_eq!(DROPS.get(), 0);
 
         let s = Struct::default();
@@ -477,7 +477,7 @@ mod tests {
         let s = Struct::default();
 
         {
-            let mut vec = StaticVector::<Struct, 10>::new();
+            let mut vec = Vec::<Struct, 10>::new();
             assert_eq!(DROPS.get(), 0);
 
             for _ in 1..4 {

@@ -1,4 +1,4 @@
-# StaticVector
+# Static Vector
 
 [![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/andreiavrammsd/static_vector.rs/workflows/CI/badge.svg)](https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/ci.yml)
@@ -6,7 +6,7 @@
 
 A no-std, stack-allocated vector with fixed capacity and dynamic length.
 
-[`StaticVector`] stores elements on the stack using a fixed-size array without heap allocations.
+[`Vec`] stores elements on the stack using a fixed-size array without heap allocations.
 
 Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
 The goal is to allocate only when needed. When first constructed, the vector will not allocate.
@@ -21,8 +21,8 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 
 ## Requirements
 
-- `T: Clone` for insertion: [`StaticVector::push()`]
-- `T: Default` only if [`StaticVector::set_len()`] is used
+- `T: Clone` for insertion: [`Vec::push()`]
+- `T: Default` only if [`Vec::set_len()`] is used
 - `CAPACITY > 0`
 
 ## Complexity
@@ -37,9 +37,9 @@ All operations are O(1) except:
 ## Example
 
 ```rust
-use static_vector::StaticVector;
+use static_vector::Vec;
 
-let mut vec = StaticVector::<i32, 3>::new();
+let mut vec = Vec::<i32, 3>::new();
 
 vec.push(&4).unwrap();
 vec.push(&5).unwrap();

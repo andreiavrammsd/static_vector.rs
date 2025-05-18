@@ -1,8 +1,8 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use static_vector::StaticVector;
+use static_vector::Vec;
 
 fn bench_static_vector(c: &mut Criterion) {
-    let mut vec = StaticVector::<i32, 10>::new();
+    let mut vec = Vec::<i32, 10>::new();
 
     c.bench_function("push and clear", |b| {
         b.iter(|| {
