@@ -59,7 +59,7 @@ match vec.set_len(1) {
 }
 
 vec.clear();
-assert_eq!(vec.len(), 0);
+assert!(vec.is_empty());
 ```
 
 ## Development on Linux
