@@ -356,17 +356,65 @@ mod tests {
         assert_eq!(even_sum, 12);
     }
 
-    #[derive(Clone, Default)]
+    #[derive(Clone)]
     struct Struct {}
 
     thread_local! {
+        static DEFAULTS: Cell<usize> = const {Cell::new(0)};
         static DROPS: Cell<usize> = const {Cell::new(0)};
+    }
+
+    impl Default for Struct {
+        fn default() -> Self {
+            DEFAULTS.set(DEFAULTS.get() + 1);
+            Self {}
+        }
     }
 
     impl Drop for Struct {
         fn drop(&mut self) {
             DROPS.set(DROPS.get() + 1);
         }
+    }
+
+    #[test]
+    fn construct_should_not_create_default_elements() {
+        let _ = StaticVector::<Struct, 10>::new();
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn push_should_not_create_default_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn set_len_should_create_default_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+
+        // Length zero, no defaults
+        vec.set_len(0).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Length error, no defaults
+        vec.set_len(99).unwrap_err();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Maximum length, create `CAPACITY` default values
+        vec.set_len(10).unwrap();
+        assert_eq!(DEFAULTS.get(), 10);
+
+        // Smaller length than current, no defaults
+        DEFAULTS.set(0);
+        vec.set_len(5).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Larger length than current, create `current length - new length` default values
+        DEFAULTS.set(0);
+        vec.set_len(8).unwrap();
+        assert_eq!(DEFAULTS.get(), 3);
     }
 
     #[test]
