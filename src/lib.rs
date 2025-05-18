@@ -1,34 +1,6 @@
-//! A no-std, stack-allocated vector with fixed capacity and dynamic length.
-//!
-//! [`StaticVector`] stores elements on the stack using a fixed-size array without heap allocations.
-//!
-//! Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
-//! The goal is to allocate only when needed. When first constructed, the vector will not allocate.
-//!
-//! It's a learning project, so there are no guarantees.
-//!
-//! # Features
-//! - No heap allocation (`#![no_std]` compatible)
-//! - Supports iteration, mutable access, clearing, resizing
-//! - Compile-time enforced capacity
-//!
-//! # Requirements
-//! - `T: Clone` for insertion: [`StaticVector::push()`]
-//! - `T: Default` only if [`StaticVector::set_len()`] is used
-//! - `CAPACITY > 0`
-//!
-//! # Example
-//! ```rust
-//! use static_vector::StaticVector;
-//!
-//! let mut vec = StaticVector::<i32, 4>::new();
-//! vec.push(&1).unwrap();
-//! vec.push(&2).unwrap();
-//! assert_eq!(vec.len(), 2);
-//! ```
-
 #![no_std]
 #![deny(missing_docs)]
+#![doc = include_str!("../README.md")]
 
 use core::{array, mem::MaybeUninit};
 
