@@ -4,15 +4,31 @@
 
 use core::{array, mem::MaybeUninit};
 
-/// Error type returned by [`StaticVector`].
+/// Attempted to push to a full vector
 #[derive(Debug)]
-pub enum Error {
-    /// Attempted to push to a full vector.
-    CapacityExceeded,
+#[non_exhaustive]
+pub struct CapacityExceededError;
 
-    /// Attempted to resize the vector to a length greater than its fixed capacity.
-    LengthTooLarge,
+impl core::fmt::Display for CapacityExceededError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("attempted to push to a full vector")
+    }
 }
+
+impl core::error::Error for CapacityExceededError {}
+
+/// Attempted to resize the vector to a length greater than its fixed capacity.
+#[derive(Debug)]
+#[non_exhaustive]
+pub struct LengthTooLargeError;
+
+impl core::fmt::Display for LengthTooLargeError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("attempted to resize the vector to a length greater than its fixed capacity")
+    }
+}
+
+impl core::error::Error for LengthTooLargeError {}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
 ///
@@ -62,10 +78,10 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::CapacityExceeded`] if the vector is already at full capacity.
-    pub fn push(&mut self, value: &T) -> Result<(), Error> {
+    /// Returns [`CapacityExceededError`] if the vector is already at full capacity.
+    pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
         if self.length == CAPACITY {
-            return Err(Error::CapacityExceeded);
+            return Err(CapacityExceededError);
         }
 
         self.data[self.length].write(value.clone());
@@ -89,13 +105,13 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::LengthTooLarge`] if `new_length` exceeds the vector's fixed capacity.
-    pub fn set_len(&mut self, new_length: usize) -> Result<(), Error>
+    /// Returns [`LengthTooLargeError`] if `new_length` exceeds the vector's fixed capacity.
+    pub fn set_len(&mut self, new_length: usize) -> Result<(), LengthTooLargeError>
     where
         T: Default,
     {
         if new_length > CAPACITY {
-            return Err(Error::LengthTooLarge);
+            return Err(LengthTooLargeError);
         }
 
         if new_length > self.length {
@@ -249,7 +265,7 @@ mod tests {
         let mut vec = StaticVector::<i32, 2>::new();
         assert!(vec.push(&1).is_ok());
         assert!(vec.push(&2).is_ok());
-        assert!(matches!(vec.push(&3), Err(Error::CapacityExceeded)));
+        assert!(matches!(vec.push(&3), Err(CapacityExceededError)));
 
         assert_eq!(vec.get(0).unwrap(), &1);
         assert_eq!(vec.get(1).unwrap(), &2);
@@ -271,7 +287,7 @@ mod tests {
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
 
-        assert!(matches!(vec.set_len(100), Err(Error::LengthTooLarge)));
+        assert!(matches!(vec.set_len(100), Err(LengthTooLargeError)));
 
         vec.clear();
         assert_eq!(vec.len(), 0);
