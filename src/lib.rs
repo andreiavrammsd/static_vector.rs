@@ -252,7 +252,9 @@ mod tests {
     use super::*;
 
     extern crate std;
-    use std::{cell::Cell, thread_local};
+    use std::{cell::Cell, format, thread_local};
+
+    fn assert_is_core_error<T: core::error::Error>() {}
 
     #[test]
     fn construct() {
@@ -281,7 +283,10 @@ mod tests {
         let mut vec = Vec::<i32, 2>::new();
         assert!(vec.push(&1).is_ok());
         assert!(vec.push(&2).is_ok());
+
         assert!(matches!(vec.push(&3), Err(CapacityExceededError)));
+        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "attempted to push to a full vector");
+        assert_is_core_error::<CapacityExceededError>();
 
         assert_eq!(vec.get(0).unwrap(), &1);
         assert_eq!(vec.get(1).unwrap(), &2);
@@ -304,6 +309,11 @@ mod tests {
         assert!(!vec.is_empty());
 
         assert!(matches!(vec.set_len(100), Err(LengthTooLargeError)));
+        assert_eq!(
+            format!("{}", vec.set_len(100).unwrap_err()),
+            "attempted to resize the vector to a length greater than its fixed capacity"
+        );
+        assert_is_core_error::<LengthTooLargeError>();
 
         vec.clear();
         assert_eq!(vec.len(), 0);
