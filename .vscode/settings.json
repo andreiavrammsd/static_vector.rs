@@ -1,4 +1,5 @@
 {
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
+    "coverage-gutters.coverageBaseDir": "**",
 }

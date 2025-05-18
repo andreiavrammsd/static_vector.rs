@@ -11,9 +11,13 @@ fmt:
 lint:
 	cargo clippy --all-targets --all-features
 
-coverage:
+coverage-html:
 	cargo llvm-cov --html
 	open target/llvm-cov/html/index.html
+
+# for VS Code Coverage Gutters
+coverage-info:
+	cargo llvm-cov --all-features --workspace --lcov --output-path target/llvm-cov/lcov.info 
 
 bench:
 	cargo bench
