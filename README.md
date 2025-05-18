@@ -6,7 +6,7 @@
 
 A no-std, stack-allocated vector with fixed capacity and dynamic length.
 
-`StaticVector` stores elements on the stack using a fixed-size array without heap allocations.
+[`StaticVector`] stores elements on the stack using a fixed-size array without heap allocations.
 
 Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
 The goal is to allocate only when needed. When first constructed, the vector will not allocate.
@@ -21,8 +21,8 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 
 ## Requirements
 
-- `T: Clone` for insertion: `push`
-- `T: Default` only if `set_len` is used
+- `T: Clone` for insertion: [`StaticVector::push()`]
+- `T: Default` only if [`StaticVector::set_len()`] is used
 - `CAPACITY > 0`
 
 ## Example
@@ -30,12 +30,28 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 ```rust
 use static_vector::StaticVector;
 
-let mut vec = StaticVector::<i32, 4>::new();
-vec.push(&1).unwrap();
-vec.push(&2).unwrap();
-assert_eq!(vec.len(), 2);
+let mut vec = StaticVector::<i32, 3>::new();
+
+vec.push(&4).unwrap();
+vec.push(&5).unwrap();
+vec.push(&6).unwrap();
+assert_eq!(vec.len(), 3);
+
+let sum_of_even_numbers = vec.iter().filter(|n| *n % 2 == 0).sum::<i32>();
+assert_eq!(sum_of_even_numbers, 10);
+
+vec.push(&2).unwrap_err();
+assert_eq!(vec.len(), 3);
+
+match vec.set_len(1) {
+    Ok(()) => assert_eq!(vec.len(), 1),
+    Err(err) => eprintln!("{:?}", err),
+}
+
+vec.clear();
+assert_eq!(vec.len(), 0);
 ```
 
 ## Development on Linux
 
-See [Makefile](Makefile).
+See [Makefile](https://github.com/andreiavrammsd/static_vector.rs/blob/master/Makefile).
