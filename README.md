@@ -45,6 +45,7 @@ vec.push(&4).unwrap();
 vec.push(&5).unwrap();
 vec.push(&6).unwrap();
 assert_eq!(vec.len(), 3);
+assert_eq!(vec.first(), Some(&4));
 
 let sum_of_even_numbers = vec.iter().filter(|n| *n % 2 == 0).sum::<i32>();
 assert_eq!(sum_of_even_numbers, 10);
