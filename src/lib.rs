@@ -158,14 +158,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter(&self) -> StaticVectorIterator<T> {
-        StaticVectorIterator { data: &self.data, size: self.length, index: 0 }
+    pub fn iter(&self) -> Iter<T> {
+        Iter { data: &self.data, size: self.length, index: 0 }
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter_mut(&mut self) -> StaticVectorMutableIterator<T> {
-        StaticVectorMutableIterator { data: &mut self.data, size: self.length, index: 0 }
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut { data: &mut self.data, size: self.length, index: 0 }
     }
 
     fn drop(&mut self, from: usize, to: usize) {
@@ -187,13 +187,13 @@ impl<T: Clone, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
 ///
 /// Created by calling [`Vec::iter()`].
 #[must_use = "must consume iterator"]
-pub struct StaticVectorIterator<'a, T> {
+pub struct Iter<'a, T> {
     data: &'a [MaybeUninit<T>],
     size: usize,
     index: usize,
 }
 
-impl<'a, T> Iterator for StaticVectorIterator<'a, T> {
+impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -211,13 +211,13 @@ impl<'a, T> Iterator for StaticVectorIterator<'a, T> {
 ///
 /// Created by calling [`Vec::iter_mut()`].
 #[must_use = "must consume iterator"]
-pub struct StaticVectorMutableIterator<'a, T> {
+pub struct IterMut<'a, T> {
     data: &'a mut [MaybeUninit<T>],
     size: usize,
     index: usize,
 }
 
-impl<'a, T> Iterator for StaticVectorMutableIterator<'a, T> {
+impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
