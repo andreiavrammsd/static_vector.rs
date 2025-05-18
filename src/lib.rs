@@ -159,13 +159,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter(&self) -> Iter<T> {
-        Iter { data: &self.data, size: self.length, index: 0 }
+        Iter::new(&self.data, self.length)
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter_mut(&mut self) -> IterMut<T> {
-        IterMut { data: &mut self.data, size: self.length, index: 0 }
+        IterMut::new(&mut self.data, self.length)
     }
 
     fn drop(&mut self, from: usize, to: usize) {
@@ -193,6 +193,14 @@ pub struct Iter<'a, T> {
     index: usize,
 }
 
+impl<'a, T> Iter<'a, T> {
+    /// Creates immutable iterator.
+    #[inline(always)]
+    pub fn new(data: &'a [MaybeUninit<T>], size: usize) -> Self {
+        Self { data, size, index: 0 }
+    }
+}
+
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
@@ -215,6 +223,14 @@ pub struct IterMut<'a, T> {
     data: &'a mut [MaybeUninit<T>],
     size: usize,
     index: usize,
+}
+
+impl<'a, T> IterMut<'a, T> {
+    /// Creates mutable iterator.
+    #[inline(always)]
+    pub fn new(data: &'a mut [MaybeUninit<T>], size: usize) -> Self {
+        Self { data, size, index: 0 }
+    }
 }
 
 impl<'a, T> Iterator for IterMut<'a, T> {
