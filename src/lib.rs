@@ -247,6 +247,9 @@ impl<'a, T> Iterator for StaticVectorMutableIterator<'a, T> {
 mod tests {
     use super::*;
 
+    extern crate std;
+    use std::{cell::Cell, thread_local};
+
     #[test]
     fn construct() {
         assert!(StaticVector::<i32, 3>::new().is_empty());
@@ -351,5 +354,150 @@ mod tests {
 
         let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
         assert_eq!(even_sum, 12);
+    }
+
+    struct Struct {}
+
+    thread_local! {
+        static DEFAULTS: Cell<usize> = const {Cell::new(0)};
+        static CLONES: Cell<usize> = const {Cell::new(0)};
+        static DROPS: Cell<usize> = const {Cell::new(0)};
+    }
+
+    impl Default for Struct {
+        fn default() -> Self {
+            DEFAULTS.set(DEFAULTS.get() + 1);
+            Self {}
+        }
+    }
+
+    impl Clone for Struct {
+        fn clone(&self) -> Self {
+            CLONES.set(CLONES.get() + 1);
+            Self {}
+        }
+    }
+
+    impl Drop for Struct {
+        fn drop(&mut self) {
+            DROPS.set(DROPS.get() + 1);
+        }
+    }
+
+    #[test]
+    fn construct_should_not_create_default_elements() {
+        let _ = StaticVector::<Struct, 10>::new();
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn push_should_not_create_default_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn set_len_should_create_default_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+
+        // Length zero, no defaults
+        vec.set_len(0).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Length error, no defaults
+        vec.set_len(99).unwrap_err();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Maximum length, create `CAPACITY` default values
+        vec.set_len(10).unwrap();
+        assert_eq!(DEFAULTS.get(), 10);
+
+        // Smaller length than current, no defaults
+        DEFAULTS.set(0);
+        vec.set_len(5).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Larger length than current, create `current length - new length` default values
+        DEFAULTS.set(0);
+        vec.set_len(8).unwrap();
+        assert_eq!(DEFAULTS.get(), 3);
+    }
+
+    #[test]
+    fn push_should_clone_element() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(CLONES.get(), 1);
+
+        vec.push(&Struct {}).unwrap();
+        vec.push(&Struct {}).unwrap();
+        assert_eq!(CLONES.get(), 3);
+    }
+
+    #[test]
+    fn clear_should_drop_all_allocated_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+        assert_eq!(DROPS.get(), 0);
+
+        let s = Struct::default();
+        for _ in 1..4 {
+            vec.push(&s).unwrap()
+        }
+        assert_eq!(DROPS.get(), 0);
+
+        vec.clear();
+        assert_eq!(DROPS.get(), 3);
+    }
+
+    #[test]
+    fn set_len_should_drop_all_allocated_elements() {
+        let mut vec = StaticVector::<Struct, 10>::new();
+        assert_eq!(DROPS.get(), 0);
+
+        let s = Struct::default();
+        for _ in 1..6 {
+            vec.push(&s).unwrap()
+        }
+        assert_eq!(DROPS.get(), 0);
+
+        // Same length, no drops
+        vec.set_len(5).unwrap();
+        assert_eq!(DROPS.get(), 0);
+
+        // Length error, no drop
+        vec.set_len(999).unwrap_err();
+        assert_eq!(DROPS.get(), 0);
+
+        // Length smaller, drop elements after
+        vec.set_len(2).unwrap();
+        assert_eq!(DROPS.get(), 3);
+
+        // Same length again, no change in number of drops
+        vec.set_len(2).unwrap();
+        assert_eq!(DROPS.get(), 3);
+
+        // Length zero, drop all
+        DROPS.set(0);
+        vec.set_len(0).unwrap();
+        assert_eq!(DROPS.get(), 2);
+    }
+
+    #[test]
+    fn going_out_of_scope_should_drop_all_allocated_elements() {
+        let s = Struct::default();
+
+        {
+            let mut vec = StaticVector::<Struct, 10>::new();
+            assert_eq!(DROPS.get(), 0);
+
+            for _ in 1..4 {
+                vec.push(&s).unwrap()
+            }
+            assert_eq!(DROPS.get(), 0);
+        }
+
+        assert_eq!(DROPS.get(), 3);
     }
 }
