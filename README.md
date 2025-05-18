@@ -25,6 +25,15 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 - `T: Default` only if [`StaticVector::set_len()`] is used
 - `CAPACITY > 0`
 
+## Complexity
+
+All operations are O(1) except:
+
+| Method      | Time Complexity                  | Space Complexity                |
+|-------------|----------------------------------|---------------------------------|
+| `clear`     | O(current length)                | O(1)                            |
+| `set_len`   | O(new length - current length)   | O(new length - current length)  |
+
 ## Example
 
 ```rust
