@@ -9,7 +9,6 @@
 //!
 //! # Features
 //! - No heap allocation (`#![no_std]` compatible)
-//! - Constant-time indexed access
 //! - Supports iteration, mutable access, clearing, resizing
 //! - Compile-time enforced capacity
 //!
@@ -35,7 +34,13 @@ use core::{array, mem::MaybeUninit};
 
 /// Error type returned by [`StaticVector`].
 #[derive(Debug)]
-pub struct Error(pub &'static str);
+pub enum Error {
+    /// Attempted to push to a full vector.
+    CapacityExceeded,
+
+    /// Attempted to resize the vector to a length greater than its fixed capacity.
+    LengthTooLarge,
+}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
 ///
@@ -85,10 +90,10 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`] if the vector is already at full capacity.
+    /// Returns [`Error::CapacityExceeded`] if the vector is already at full capacity.
     pub fn push(&mut self, value: &T) -> Result<(), Error> {
         if self.length == CAPACITY {
-            return Err(Error("capacity"));
+            return Err(Error::CapacityExceeded);
         }
 
         self.data[self.length].write(value.clone());
@@ -112,13 +117,13 @@ impl<T: Clone, const CAPACITY: usize> StaticVector<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`Error`] if `new_length` exceeds the vector's fixed capacity.
+    /// Returns [`Error::LengthTooLarge`] if `new_length` exceeds the vector's fixed capacity.
     pub fn set_len(&mut self, new_length: usize) -> Result<(), Error>
     where
         T: Default,
     {
         if new_length > CAPACITY {
-            return Err(Error("new length > capacity"));
+            return Err(Error::LengthTooLarge);
         }
 
         if new_length > self.length {
@@ -269,7 +274,7 @@ mod tests {
         let mut vec = StaticVector::<i32, 2>::new();
         assert!(vec.push(&1).is_ok());
         assert!(vec.push(&2).is_ok());
-        assert!(vec.push(&3).is_err());
+        assert!(matches!(vec.push(&3), Err(Error::CapacityExceeded)));
 
         assert_eq!(vec.get(0).unwrap(), &1);
         assert_eq!(vec.get(1).unwrap(), &2);
@@ -291,7 +296,7 @@ mod tests {
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
 
-        assert!(vec.set_len(100).is_err());
+        assert!(matches!(vec.set_len(100), Err(Error::LengthTooLarge)));
 
         vec.clear();
         assert_eq!(vec.len(), 0);

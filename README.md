@@ -16,7 +16,6 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 ## Features
 
 - No heap allocation (`#![no_std]` compatible)
-- Constant-time indexed access
 - Supports iteration, mutable access, clearing, resizing
 - Compile-time enforced capacity
 
