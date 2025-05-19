@@ -7,7 +7,7 @@ repository = "https://github.com/andreiavrammsd/static_vector.rs"
 readme = "README.md"
 license = "MIT"
 keywords = ["vector"]
-categories = ["data-structures"]
+categories = ["data-structures", "no-std"]
 publish = false
 
 [profile.dev]
