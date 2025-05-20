@@ -413,11 +413,7 @@ mod tests {
 
     #[test]
     fn pop_if() {
-        let is_even = |s: &Struct| {
-            let i = s.i;
-            let _ = i;
-            s.i % 2 == 0
-        };
+        let is_even = |s: &Struct| s.i % 2 == 0;
         fn not<F>(f: F) -> impl Fn(&Struct) -> bool
         where
             F: Fn(&Struct) -> bool,
