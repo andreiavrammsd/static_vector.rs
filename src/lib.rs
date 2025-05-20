@@ -231,7 +231,7 @@ pub struct Iter<'a, T> {
 impl<'a, T> Iter<'a, T> {
     /// Creates immutable iterator.
     #[inline(always)]
-    pub fn new(data: &'a [MaybeUninit<T>], size: usize) -> Self {
+    pub const fn new(data: &'a [MaybeUninit<T>], size: usize) -> Self {
         Self { data, size, index: 0 }
     }
 }
@@ -272,7 +272,7 @@ pub struct IterMut<'a, T> {
 impl<'a, T> IterMut<'a, T> {
     /// Creates mutable iterator.
     #[inline(always)]
-    pub fn new(data: &'a mut [MaybeUninit<T>], size: usize) -> Self {
+    pub const fn new(data: &'a mut [MaybeUninit<T>], size: usize) -> Self {
         Self { data, size, index: 0 }
     }
 }
