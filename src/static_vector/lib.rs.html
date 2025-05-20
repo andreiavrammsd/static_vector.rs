@@ -57,7 +57,7 @@
 <a href=#57 id=57 data-nosnippet>57</a>
 <a href=#58 id=58 data-nosnippet>58</a>    <span class="doccomment">/// Returns the maximum number of elements the vector can contain.
 <a href=#59 id=59 data-nosnippet>59</a>    </span><span class="attr">#[inline(always)]
-<a href=#60 id=60 data-nosnippet>60</a>    #[doc(alias(<span class="string">"max"</span>, <span class="string">"size"</span>, <span class="string">"limit"</span>))]
+<a href=#60 id=60 data-nosnippet>60</a>    #[doc(alias(<span class="string">"max"</span>, <span class="string">"size"</span>, <span class="string">"limit"</span>, <span class="string">"length"</span>))]
 <a href=#61 id=61 data-nosnippet>61</a>    </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
 <a href=#62 id=62 data-nosnippet>62</a>        CAPACITY
 <a href=#63 id=63 data-nosnippet>63</a>    }
@@ -95,7 +95,7 @@
 <a href=#95 id=95 data-nosnippet>95</a>
 <a href=#96 id=96 data-nosnippet>96</a>    <span class="doccomment">/// Removes all elements. Size will be zero.
 <a href=#97 id=97 data-nosnippet>97</a>    </span><span class="attr">#[inline]
-<a href=#98 id=98 data-nosnippet>98</a>    #[doc(alias(<span class="string">"reset"</span>, <span class="string">"remove"</span>, <span class="string">"truncate"</span>))]
+<a href=#98 id=98 data-nosnippet>98</a>    #[doc(alias(<span class="string">"reset"</span>, <span class="string">"remove"</span>, <span class="string">"truncate"</span>, <span class="string">"empty"</span>))]
 <a href=#99 id=99 data-nosnippet>99</a>    </span><span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
 <a href=#100 id=100 data-nosnippet>100</a>        <span class="self">self</span>.drop(<span class="number">0</span>, <span class="self">self</span>.length);
 <a href=#101 id=101 data-nosnippet>101</a>        <span class="self">self</span>.length = <span class="number">0
