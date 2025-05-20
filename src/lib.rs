@@ -250,6 +250,15 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T: 'a + Clone, const CAPACITY: usize> IntoIterator for &'a Vec<T, CAPACITY> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 /// Mutable iterator over a [`Vec`].
 ///
 /// Created by calling [`Vec::iter_mut()`].
@@ -484,6 +493,20 @@ mod tests {
 
         let even_sum = vec.iter().filter(|v| *v % 2 == 0).sum::<i32>();
         assert_eq!(even_sum, 12);
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut vec = Vec::<i32, 10>::new();
+        for i in 1..8 {
+            vec.push(&i).unwrap();
+        }
+
+        let mut s = 0;
+        for i in &vec {
+            s += i;
+        }
+        assert_eq!(s, 28);
     }
 
     #[test]
