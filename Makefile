@@ -1,7 +1,7 @@
 .SILENT:
 
 # VS Code: Ctrl+Shift+B
-all: test fmt lint
+all: test fmt lint build-doc
 
 test:
 	cargo test
@@ -28,6 +28,9 @@ bench:
 
 doc:
 	cargo doc --open
+
+build-doc:
+	cargo doc
 
 dev:
 	echo Installing pre-commit hook...

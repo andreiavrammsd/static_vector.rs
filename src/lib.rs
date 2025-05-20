@@ -126,27 +126,27 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         Ok(())
     }
 
-    /// Returns a reference to the first element in the vector, or `None` if the vector is empty.
+    /// Returns a reference to the first element in the vector, or [`None`] if the vector is empty.
     #[must_use]
     #[inline]
     pub fn first(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
     }
 
-    /// Returns a reference to the last element in the vector, or `None` if the vector is empty.
+    /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
     #[must_use]
     #[inline]
     pub fn last(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
     }
 
-    /// Returns a reference to the element at the specified `index`, or `None` if out of bounds.
+    /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
     pub fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
 
-    /// Returns a mutable reference to the element at the specified `index`, or `None` if out of bounds.
+    /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
