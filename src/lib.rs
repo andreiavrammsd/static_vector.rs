@@ -168,6 +168,24 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         }
     }
 
+    /// Returns (and removes) the last element from the vector if the predicate returns true,
+    /// or [`None`] if the vector is empty or the predicate returns false.
+    #[must_use]
+    #[inline]
+    pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
+        if self.length == 0 {
+            None
+        } else {
+            let ptr = self.data[self.length - 1].as_ptr();
+            if !predicate(unsafe { &*ptr }) {
+                None
+            } else {
+                self.length -= 1;
+                Some(unsafe { self.data[self.length].assume_init_read() })
+            }
+        }
+    }
+
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter(&self) -> Iter<'_, T> {
@@ -382,10 +400,64 @@ mod tests {
         assert_eq!(vec.pop().unwrap().i, 1);
         assert!(vec.is_empty());
         assert!(vec.pop().is_none());
+        assert_eq!(DROPS.get(), 3);
 
         assert_eq!(DEFAULTS.get(), 0);
         assert_eq!(CLONES.get(), 3); // from the three pushes
+    }
+
+    #[test]
+    fn pop_if() {
+        let is_even = |s: &Struct| {
+            let i = s.i;
+            let _ = i;
+            s.i % 2 == 0
+        };
+        fn not<F>(f: F) -> impl Fn(&Struct) -> bool
+        where
+            F: Fn(&Struct) -> bool,
+        {
+            move |s| !f(s)
+        }
+
+        let mut vec = Vec::<Struct, 4>::new();
+        assert!(vec.pop_if(is_even).is_none());
+
+        let s1 = Struct { i: 1 };
+        vec.push(&s1).unwrap();
+
+        let s2 = Struct { i: 2 };
+        vec.push(&s2).unwrap();
+
+        let s3 = Struct { i: 3 };
+        vec.push(&s3).unwrap();
+
+        assert!(vec.pop_if(is_even).is_none());
+        assert_eq!(vec.len(), 3);
+        assert_eq!(DROPS.get(), 0);
+
+        assert_eq!(vec.pop_if(not(is_even)).unwrap().i, 3);
+        assert_eq!(vec.len(), 2);
+        assert_eq!(DROPS.get(), 1);
+
+        assert!(vec.pop_if(not(is_even)).is_none());
+        assert_eq!(vec.len(), 2);
+        assert_eq!(DROPS.get(), 1);
+
+        assert_eq!(vec.pop_if(is_even).unwrap().i, 2);
+        assert_eq!(vec.len(), 1);
+        assert_eq!(DROPS.get(), 2);
+
+        assert_eq!(vec.pop_if(not(is_even)).unwrap().i, 1);
+        assert!(vec.is_empty());
         assert_eq!(DROPS.get(), 3);
+
+        assert!(vec.pop_if(is_even).is_none());
+        assert!(vec.is_empty());
+        assert_eq!(DROPS.get(), 3);
+
+        assert_eq!(DEFAULTS.get(), 0);
+        assert_eq!(CLONES.get(), 3); // from the three pushes
     }
 
     #[test]
