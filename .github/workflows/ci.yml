@@ -60,12 +60,13 @@ jobs:
       - run: cargo doc --no-deps
       - run: |
           echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=static_vector/index.html" /></head></html>' > target/doc/index.html
+        if: github.ref == 'refs/heads/master'
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
           publish_branch: gh-pages
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
 
   clippy:
     runs-on: ubuntu-latest
