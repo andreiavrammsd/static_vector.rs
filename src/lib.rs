@@ -2,33 +2,33 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use core::{array, mem::MaybeUninit};
+use core::{array, error, fmt, mem::MaybeUninit};
 
 /// Attempted to push to a full vector
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct CapacityExceededError;
 
-impl core::fmt::Display for CapacityExceededError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl fmt::Display for CapacityExceededError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("attempted to push to a full vector")
     }
 }
 
-impl core::error::Error for CapacityExceededError {}
+impl error::Error for CapacityExceededError {}
 
 /// Attempted to resize the vector to a length greater than its fixed capacity.
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct LengthTooLargeError;
 
-impl core::fmt::Display for LengthTooLargeError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+impl fmt::Display for LengthTooLargeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("attempted to resize the vector to a length greater than its fixed capacity")
     }
 }
 
-impl core::error::Error for LengthTooLargeError {}
+impl error::Error for LengthTooLargeError {}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
 ///
@@ -56,21 +56,21 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector can contain.
-    #[inline(always)]
+    #[inline]
     #[doc(alias("max", "size", "limit", "length"))]
     pub const fn capacity(&self) -> usize {
         CAPACITY
     }
 
     /// Returns the maximum number of elements the vector currenly contains.
-    #[inline(always)]
+    #[inline]
     #[doc(alias("length", "size"))]
     pub const fn len(&self) -> usize {
         self.length
     }
 
     /// Returns whether the vector is empty or not.
-    #[inline(always)]
+    #[inline]
     pub const fn is_empty(&self) -> bool {
         self.length == 0
     }
@@ -97,8 +97,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("reset", "remove", "truncate", "empty"))]
     pub fn clear(&mut self) {
-        self.drop(0, self.length);
-        self.length = 0
+        self.drop_range(0, self.length);
+        self.length = 0;
     }
 
     /// Resizes the vector to the `new_length`.
@@ -125,7 +125,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
                 self.data[i].write(T::default());
             }
         } else {
-            self.drop(new_length, self.length);
+            self.drop_range(new_length, self.length);
         }
 
         self.length = new_length;
@@ -137,7 +137,15 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("front", "head", "start"))]
     pub const fn first(&self) -> Option<&T> {
-        if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
+        if self.length == 0 {
+            None
+        } else {
+            // SAFETY:
+            // We ensure that:
+            // - `0` is within bounds of `self.data`.
+            // - The element at `0` has been initialized.
+            Some(unsafe { &*self.data[0].as_ptr() })
+        }
     }
 
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
@@ -145,7 +153,15 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("back", "tail", "end"))]
     pub const fn last(&self) -> Option<&T> {
-        if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
+        if self.length == 0 {
+            None
+        } else {
+            // SAFETY:
+            // We ensure that:
+            // - `self.length - 1` is within bounds of `self.data`.
+            // - The element at `self.length - 1` has been initialized.
+            Some(unsafe { &*self.data[self.length - 1].as_ptr() })
+        }
     }
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
@@ -153,7 +169,15 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("at", "index"))]
     pub const fn get(&self, index: usize) -> Option<&T> {
-        if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
+        if index >= self.length {
+            None
+        } else {
+            // SAFETY:
+            // We ensure that:
+            // - `index` is within bounds of `self.data`.
+            // - The element at `index` has been initialized.
+            Some(unsafe { &*self.data[index].as_ptr() })
+        }
     }
 
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
@@ -164,6 +188,10 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         if index >= self.length {
             None
         } else {
+            // SAFETY:
+            // We ensure that:
+            // - `index` is within bounds of `self.data`.
+            // - The element at `index` has been initialized.
             Some(unsafe { &mut *self.data[index].as_mut_ptr() })
         }
     }
@@ -177,6 +205,11 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
             None
         } else {
             self.length -= 1;
+
+            // SAFETY:
+            // We ensure that:
+            // - `self.length` is within bounds of `self.data`.
+            // - The element at `self.length` has been initialized.
             Some(unsafe { self.data[self.length].assume_init_read() })
         }
     }
@@ -186,25 +219,29 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("remove", "get"))]
-    pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
+    pub fn pop_if<F: FnOnce(&T) -> bool>(&mut self, predicate: F) -> Option<T> {
         let last = self.last()?;
         if predicate(last) { self.pop() } else { None }
     }
 
     /// Returns an iterator over immutable references to the elements in the vector.
-    #[inline(always)]
+    #[inline]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(&self.data, self.length)
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
-    #[inline(always)]
+    #[inline]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(&mut self.data, self.length)
     }
 
-    fn drop(&mut self, from: usize, to: usize) {
+    fn drop_range(&mut self, from: usize, to: usize) {
         for i in from..to {
+            // SAFETY:
+            // We ensure that:
+            // - `i` is within bounds of `self.data`.
+            // - The element at `i` has been initialized.
             unsafe {
                 self.data[i].assume_init_drop();
             }
@@ -214,7 +251,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
 impl<T: Clone, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
     fn drop(&mut self) {
-        self.drop(0, self.length);
+        self.drop_range(0, self.length);
     }
 }
 
@@ -230,7 +267,7 @@ pub struct Iter<'a, T> {
 
 impl<'a, T> Iter<'a, T> {
     /// Creates immutable iterator.
-    #[inline(always)]
+    #[inline]
     pub const fn new(data: &'a [MaybeUninit<T>], size: usize) -> Self {
         Self { data, size, index: 0 }
     }
@@ -243,6 +280,10 @@ impl<'a, T> Iterator for Iter<'a, T> {
         if self.index == self.size {
             None
         } else {
+            // SAFETY:
+            // We ensure that:
+            // - `self.index` is within bounds of `self.data`.
+            // - The element at `self.index` has been initialized.
             let value = unsafe { &*self.data[self.index].as_ptr() };
             self.index += 1;
             Some(value)
@@ -271,7 +312,7 @@ pub struct IterMut<'a, T> {
 
 impl<'a, T> IterMut<'a, T> {
     /// Creates mutable iterator.
-    #[inline(always)]
+    #[inline]
     pub const fn new(data: &'a mut [MaybeUninit<T>], size: usize) -> Self {
         Self { data, size, index: 0 }
     }
@@ -284,7 +325,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         if self.index == self.size {
             None
         } else {
+            // SAFETY:
+            // We ensure that:
+            // - `self.index` is within bounds of `self.data`.
+            // - The element at `self.index` has been initialized.
             let value = unsafe { &mut *self.data[self.index].as_mut_ptr() };
+
             self.index += 1;
             Some(value)
         }
@@ -304,10 +350,14 @@ impl<'a, T: 'a + Clone, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, C
 mod tests {
     use super::*;
 
+    extern crate alloc;
     extern crate std;
-    use std::{cell::Cell, format, thread_local};
+    use alloc::format;
+    use core::cell::Cell;
+    use core::error::Error;
+    use std::thread_local;
 
-    fn assert_is_core_error<T: core::error::Error>() {}
+    fn assert_is_core_error<T: Error>() {}
 
     #[test]
     fn construct() {
@@ -443,15 +493,16 @@ mod tests {
         assert_eq!(CLONES.get(), 3); // from the three pushes
     }
 
+    fn not<F>(f: F) -> impl Fn(&Struct) -> bool
+    where
+        F: Fn(&Struct) -> bool,
+    {
+        move |s| !f(s)
+    }
+
     #[test]
     fn pop_if() {
         let is_even = |s: &Struct| s.i % 2 == 0;
-        fn not<F>(f: F) -> impl Fn(&Struct) -> bool
-        where
-            F: Fn(&Struct) -> bool,
-        {
-            move |s| !f(s)
-        }
 
         let mut vec = Vec::<Struct, 4>::new();
         assert!(vec.pop_if(is_even).is_none());
@@ -497,7 +548,7 @@ mod tests {
     fn iter() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap()
+            vec.push(&i).unwrap();
         }
 
         let even_sum = vec.iter().filter(|v| *v % 2 == 0).sum::<i32>();
@@ -522,7 +573,7 @@ mod tests {
     fn iter_mut() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap()
+            vec.push(&i).unwrap();
         }
 
         let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
@@ -588,7 +639,7 @@ mod tests {
 
         let s = Struct { i: 0 };
         for _ in 1..4 {
-            vec.push(&s).unwrap()
+            vec.push(&s).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
 
@@ -603,7 +654,7 @@ mod tests {
 
         let s = Struct { i: 0 };
         for _ in 1..6 {
-            vec.push(&s).unwrap()
+            vec.push(&s).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
 
@@ -638,10 +689,10 @@ mod tests {
             assert_eq!(DROPS.get(), 0);
 
             for _ in 1..4 {
-                vec.push(&s).unwrap()
+                vec.push(&s).unwrap();
             }
             assert_eq!(DROPS.get(), 0);
-        }
+        };
 
         assert_eq!(DROPS.get(), 3);
     }
