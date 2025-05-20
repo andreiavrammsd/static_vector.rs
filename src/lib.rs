@@ -65,13 +65,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns the maximum number of elements the vector currenly contains.
     #[inline(always)]
     #[doc(alias("length", "size"))]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.length
     }
 
     /// Returns whether the vector is empty or not.
     #[inline(always)]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.length == 0
     }
 
@@ -136,7 +136,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("front", "head", "start"))]
-    pub fn first(&self) -> Option<&T> {
+    pub const fn first(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
     }
 
@@ -144,7 +144,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("back", "tail", "end"))]
-    pub fn last(&self) -> Option<&T> {
+    pub const fn last(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
     }
 
@@ -152,7 +152,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("at", "index"))]
-    pub fn get(&self, index: usize) -> Option<&T> {
+    pub const fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
 
@@ -160,7 +160,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("at", "index"))]
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+    pub const fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
             None
         } else {
@@ -172,7 +172,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     #[doc(alias("remove", "get"))]
-    pub fn pop(&mut self) -> Option<T> {
+    pub const fn pop(&mut self) -> Option<T> {
         if self.length == 0 {
             None
         } else {
@@ -193,13 +193,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter(&self) -> Iter<'_, T> {
+    pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(&self.data, self.length)
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
+    pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(&mut self.data, self.length)
     }
 
