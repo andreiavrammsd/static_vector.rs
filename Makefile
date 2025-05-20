@@ -27,10 +27,10 @@ bench:
 	xdg-open target/criterion/push\ and\ clear/report/index.html
 
 doc:
-	cargo doc --open
+	cargo doc --no-deps --open
 
 build-doc:
-	cargo doc
+	cargo doc --no-deps
 
 dev:
 	echo Installing pre-commit hook...
