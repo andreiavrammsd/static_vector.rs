@@ -158,20 +158,20 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         Iter::new(&self.data, self.length)
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
     #[inline(always)]
-    pub fn iter_mut(&mut self) -> IterMut<T> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(&mut self.data, self.length)
     }
 
     fn drop(&mut self, from: usize, to: usize) {
         for i in from..to {
             unsafe {
-                self.data[i].as_mut_ptr().drop_in_place();
+                self.data[i].assume_init_drop();
             }
         }
     }

@@ -50,6 +50,13 @@ jobs:
           components: rustfmt
       - run: cargo fmt --all -- --check
 
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo doc
+
   clippy:
     runs-on: ubuntu-latest
     steps:
@@ -100,6 +107,7 @@ jobs:
       - format
       - clippy
       - coverage
+      - doc
     steps:
       - name: validate
         run: |
