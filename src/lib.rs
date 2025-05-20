@@ -171,7 +171,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     fn drop(&mut self, from: usize, to: usize) {
         for i in from..to {
             unsafe {
-                self.data[i].as_mut_ptr().drop_in_place();
+                self.data[i].assume_init_drop();
             }
         }
     }
