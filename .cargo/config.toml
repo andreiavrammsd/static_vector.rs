@@ -1,2 +1,12 @@
 [build]
-rustflags = ["-Dwarnings"]
+rustflags = [
+    "-Dwarnings",
+    "-Dclippy::pedantic",
+    "-Dclippy::nursery",
+    "-Dclippy::cargo",
+    "-Dclippy::complexity",
+    "-Dclippy::correctness",
+    "-Dclippy::perf",
+    "-Dclippy::style",
+    "-Dclippy::suspicious",
+]

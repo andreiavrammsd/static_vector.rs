@@ -13,7 +13,7 @@ fn bench_static_vector(c: &mut Criterion) {
             vec.push(&5).unwrap();
             vec.push(&6).unwrap();
             vec.clear();
-        })
+        });
     });
 }
 

@@ -1,3 +1,4 @@
+#[cfg(test)]
 #[test]
 fn must_use() {
     let t = trybuild::TestCases::new();
