@@ -57,12 +57,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns the maximum number of elements the vector can contain.
     #[inline(always)]
+    #[doc(alias("max", "size", "limit", "length"))]
     pub fn capacity(&self) -> usize {
         CAPACITY
     }
 
     /// Returns the maximum number of elements the vector currenly contains.
     #[inline(always)]
+    #[doc(alias("length", "size"))]
     pub fn len(&self) -> usize {
         self.length
     }
@@ -79,6 +81,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// Returns [`CapacityExceededError`] if the vector is already at full capacity.
     #[inline]
+    #[doc(alias("add", "append", "insert"))]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
         if self.length == CAPACITY {
             return Err(CapacityExceededError);
@@ -92,6 +95,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Removes all elements. Size will be zero.
     #[inline]
+    #[doc(alias("reset", "remove", "truncate", "empty"))]
     pub fn clear(&mut self) {
         self.drop(0, self.length);
         self.length = 0
@@ -107,6 +111,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`LengthTooLargeError`] if `new_length` exceeds the vector's fixed capacity.
+    #[doc(alias("resize", "length"))]
     pub fn set_len(&mut self, new_length: usize) -> Result<(), LengthTooLargeError>
     where
         T: Default,
@@ -130,6 +135,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns a reference to the first element in the vector, or [`None`] if the vector is empty.
     #[must_use]
     #[inline]
+    #[doc(alias("front", "head", "start"))]
     pub fn first(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[0].as_ptr() }) }
     }
@@ -137,6 +143,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
     #[must_use]
     #[inline]
+    #[doc(alias("back", "tail", "end"))]
     pub fn last(&self) -> Option<&T> {
         if self.length == 0 { None } else { Some(unsafe { &*self.data[self.length - 1].as_ptr() }) }
     }
@@ -144,6 +151,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
     #[inline]
+    #[doc(alias("at", "index"))]
     pub fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
@@ -151,6 +159,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
     #[inline]
+    #[doc(alias("at", "index"))]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
             None
@@ -162,6 +171,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns (and removes) the last element from the vector, or [`None`] if the vector is empty.
     #[must_use]
     #[inline]
+    #[doc(alias("remove", "get"))]
     pub fn pop(&mut self) -> Option<T> {
         if self.length == 0 {
             None
@@ -175,6 +185,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// or [`None`] if the vector is empty or the predicate returns false.
     #[must_use]
     #[inline]
+    #[doc(alias("remove", "get"))]
     pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
         let last = self.last()?;
         if predicate(last) { self.pop() } else { None }
