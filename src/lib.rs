@@ -174,6 +174,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns (and removes) the last element from the vector if the predicate returns true,
     /// or [`None`] if the vector is empty or the predicate returns false.
     #[must_use]
+    #[inline]
     pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
         let last = self.last()?;
         if predicate(last) { self.pop() } else { None }
