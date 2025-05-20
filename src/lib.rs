@@ -47,13 +47,10 @@ impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
 }
 
 impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
-    const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
-
     /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
     #[must_use]
     #[inline]
     pub fn new() -> Self {
-        let () = Self::ASSERT_CAPACITY;
         let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
         Self { data, length: 0 }
     }
@@ -286,9 +283,23 @@ mod tests {
     fn construct() {
         assert!(Vec::<i32, 3>::new().is_empty());
         assert!(Vec::<i32, 3>::default().is_empty());
+    }
 
-        // Will not build because CAPACITY must be greater than zero
-        // Vec::<i32, 0>::new().is_empty();
+    #[test]
+    fn zero_capacity() {
+        let mut empty = Vec::<i32, 0>::new();
+        assert_eq!(empty.capacity(), 0);
+        assert_eq!(empty.len(), 0);
+        assert!(empty.is_empty());
+        assert!(empty.push(&0).is_err());
+        assert!(empty.set_len(0).is_ok());
+        assert!(empty.set_len(1).is_err());
+        assert!(empty.first().is_none());
+        assert!(empty.last().is_none());
+        assert!(empty.get(0).is_none());
+        assert!(empty.get_mut(0).is_none());
+        assert!(empty.pop().is_none());
+        assert_eq!(empty.iter().count(), 0);
     }
 
     #[test]
