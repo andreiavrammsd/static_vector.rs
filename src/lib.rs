@@ -338,11 +338,11 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 
 impl<'a, T: 'a + Clone, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, CAPACITY> {
-    type Item = &'a T;
-    type IntoIter = Iter<'a, T>;
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        self.iter_mut()
     }
 }
 
@@ -578,6 +578,21 @@ mod tests {
 
         let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
         assert_eq!(even_sum, 12);
+    }
+
+    #[test]
+    fn into_iter_mut() {
+        let mut vec = Vec::<i32, 10>::new();
+        for i in 1..8 {
+            vec.push(&i).unwrap();
+        }
+
+        let mut s = 0;
+        for i in &mut vec {
+            *i *= 2;
+            s += *i;
+        }
+        assert_eq!(s, 56);
     }
 
     #[test]
