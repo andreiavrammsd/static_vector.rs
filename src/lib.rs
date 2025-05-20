@@ -236,6 +236,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         IterMut::new(&mut self.data, self.length)
     }
 
+    /// Drops all elements in given range. Needed when elements are considered to be going out of scope.
+    /// E.g.: when the vector is going out of scope, when methods such as [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
         for i in from..to {
             // SAFETY:
