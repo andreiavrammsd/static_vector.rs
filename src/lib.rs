@@ -156,6 +156,18 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         }
     }
 
+    /// Returns (and removes) the last element from the vector, or [`None`] if the vector is empty.
+    #[must_use]
+    #[inline]
+    pub fn pop(&mut self) -> Option<T> {
+        if self.length == 0 {
+            None
+        } else {
+            self.length -= 1;
+            Some(unsafe { self.data[self.length].assume_init_read() })
+        }
+    }
+
     /// Returns an iterator over immutable references to the elements in the vector.
     #[inline(always)]
     pub fn iter(&self) -> Iter<'_, T> {
@@ -349,6 +361,34 @@ mod tests {
     }
 
     #[test]
+    fn pop() {
+        let mut vec = Vec::<Struct, 4>::new();
+        assert!(vec.pop().is_none());
+
+        let s1 = Struct { i: 1 };
+        vec.push(&s1).unwrap();
+
+        let s2 = Struct { i: 2 };
+        vec.push(&s2).unwrap();
+
+        let s3 = Struct { i: 3 };
+        vec.push(&s3).unwrap();
+
+        assert_eq!(vec.pop().unwrap().i, 3);
+        assert_eq!(vec.len(), 2);
+        assert_eq!(DROPS.get(), 1);
+
+        assert_eq!(vec.pop().unwrap().i, 2);
+        assert_eq!(vec.pop().unwrap().i, 1);
+        assert!(vec.is_empty());
+        assert!(vec.pop().is_none());
+
+        assert_eq!(DEFAULTS.get(), 0);
+        assert_eq!(CLONES.get(), 3); // from the three pushes
+        assert_eq!(DROPS.get(), 3);
+    }
+
+    #[test]
     fn iter() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
@@ -370,34 +410,6 @@ mod tests {
         assert_eq!(even_sum, 12);
     }
 
-    struct Struct {}
-
-    thread_local! {
-        static DEFAULTS: Cell<usize> = const {Cell::new(0)};
-        static CLONES: Cell<usize> = const {Cell::new(0)};
-        static DROPS: Cell<usize> = const {Cell::new(0)};
-    }
-
-    impl Default for Struct {
-        fn default() -> Self {
-            DEFAULTS.set(DEFAULTS.get() + 1);
-            Self {}
-        }
-    }
-
-    impl Clone for Struct {
-        fn clone(&self) -> Self {
-            CLONES.set(CLONES.get() + 1);
-            Self {}
-        }
-    }
-
-    impl Drop for Struct {
-        fn drop(&mut self) {
-            DROPS.set(DROPS.get() + 1);
-        }
-    }
-
     #[test]
     fn construct_should_not_create_default_elements() {
         let _ = Vec::<Struct, 10>::new();
@@ -407,7 +419,7 @@ mod tests {
     #[test]
     fn push_should_not_create_default_elements() {
         let mut vec = Vec::<Struct, 10>::new();
-        vec.push(&Struct {}).unwrap();
+        vec.push(&Struct { i: 0 }).unwrap();
         assert_eq!(DEFAULTS.get(), 0);
     }
 
@@ -442,11 +454,11 @@ mod tests {
     fn push_should_clone_element() {
         let mut vec = Vec::<Struct, 10>::new();
 
-        vec.push(&Struct {}).unwrap();
+        vec.push(&Struct { i: 0 }).unwrap();
         assert_eq!(CLONES.get(), 1);
 
-        vec.push(&Struct {}).unwrap();
-        vec.push(&Struct {}).unwrap();
+        vec.push(&Struct { i: 0 }).unwrap();
+        vec.push(&Struct { i: 0 }).unwrap();
         assert_eq!(CLONES.get(), 3);
     }
 
@@ -455,7 +467,7 @@ mod tests {
         let mut vec = Vec::<Struct, 10>::new();
         assert_eq!(DROPS.get(), 0);
 
-        let s = Struct::default();
+        let s = Struct { i: 0 };
         for _ in 1..4 {
             vec.push(&s).unwrap()
         }
@@ -470,7 +482,7 @@ mod tests {
         let mut vec = Vec::<Struct, 10>::new();
         assert_eq!(DROPS.get(), 0);
 
-        let s = Struct::default();
+        let s = Struct { i: 0 };
         for _ in 1..6 {
             vec.push(&s).unwrap()
         }
@@ -500,7 +512,7 @@ mod tests {
 
     #[test]
     fn going_out_of_scope_should_drop_all_allocated_elements() {
-        let s = Struct::default();
+        let s = Struct { i: 0 };
 
         {
             let mut vec = Vec::<Struct, 10>::new();
@@ -513,5 +525,35 @@ mod tests {
         }
 
         assert_eq!(DROPS.get(), 3);
+    }
+
+    struct Struct {
+        i: i32,
+    }
+
+    thread_local! {
+        static DEFAULTS: Cell<usize> = const {Cell::new(0)};
+        static CLONES: Cell<usize> = const {Cell::new(0)};
+        static DROPS: Cell<usize> = const {Cell::new(0)};
+    }
+
+    impl Default for Struct {
+        fn default() -> Self {
+            DEFAULTS.set(DEFAULTS.get() + 1);
+            Self { i: 0 }
+        }
+    }
+
+    impl Clone for Struct {
+        fn clone(&self) -> Self {
+            CLONES.set(CLONES.get() + 1);
+            Self { i: self.i }
+        }
+    }
+
+    impl Drop for Struct {
+        fn drop(&mut self) {
+            DROPS.set(DROPS.get() + 1);
+        }
     }
 }
