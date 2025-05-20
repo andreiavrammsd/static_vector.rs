@@ -1,6 +1,7 @@
 .SILENT:
 
-all: test fmt lint
+# VS Code: Ctrl+Shift+B
+all: test fmt lint build-doc
 
 test:
 	cargo test
@@ -15,7 +16,9 @@ coverage-html:
 	cargo llvm-cov --html
 	open target/llvm-cov/html/index.html
 
-# for VS Code Coverage Gutters
+# VS Code:
+# - Activate once: F1 -> Coverage Gutters: Watch
+# - Generate coverage when needed: F1 -> Tasks: Run Task -> coverage
 coverage-info:
 	cargo llvm-cov --all-features --workspace --lcov --output-path target/llvm-cov/lcov.info 
 
@@ -25,6 +28,9 @@ bench:
 
 doc:
 	cargo doc --open
+
+build-doc:
+	cargo doc
 
 dev:
 	echo Installing pre-commit hook...

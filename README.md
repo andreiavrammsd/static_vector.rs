@@ -23,7 +23,6 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 
 - `T: Clone` for insertion: [`Vec::push()`]
 - `T: Default` only if [`Vec::set_len()`] is used
-- `CAPACITY > 0`
 
 ## Complexity
 
