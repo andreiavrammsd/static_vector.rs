@@ -49,6 +49,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     const ASSERT_CAPACITY: () = assert!(CAPACITY > 0);
 
     /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
+    #[must_use]
     #[inline]
     pub fn new() -> Self {
         let () = Self::ASSERT_CAPACITY;
