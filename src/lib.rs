@@ -178,17 +178,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// or [`None`] if the vector is empty or the predicate returns false.
     #[must_use]
     pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
-        if self.length == 0 {
-            None
-        } else {
-            let ptr = self.data[self.length - 1].as_ptr();
-            if !predicate(unsafe { &*ptr }) {
-                None
-            } else {
-                self.length -= 1;
-                Some(unsafe { self.data[self.length].assume_init_read() })
-            }
-        }
+        let last = self.last()?;
+        if predicate(last) { self.pop() } else { None }
     }
 
     /// Returns an iterator over immutable references to the elements in the vector.
