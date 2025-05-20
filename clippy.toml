@@ -1,2 +1,0 @@
-lint-inconsistent-struct-field-initializers = true
-msrv = "1.86"

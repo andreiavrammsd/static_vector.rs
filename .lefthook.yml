@@ -1,4 +1,0 @@
-pre-commit:
-  commands:
-    quality:
-      run: make
