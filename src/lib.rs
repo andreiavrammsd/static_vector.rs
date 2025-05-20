@@ -40,6 +40,7 @@ pub struct Vec<T: Clone, const CAPACITY: usize> {
 
 impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
     /// Creates an empty [`Vec`]. Equivalent to [`Vec::new()`].
+    #[inline]
     fn default() -> Self {
         Self::new()
     }
@@ -80,6 +81,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`CapacityExceededError`] if the vector is already at full capacity.
+    #[inline]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
         if self.length == CAPACITY {
             return Err(CapacityExceededError);
@@ -92,6 +94,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Removes all elements. Size will be zero.
+    #[inline]
     pub fn clear(&mut self) {
         self.drop(0, self.length);
         self.length = 0
@@ -143,12 +146,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
         if index >= self.length { None } else { Some(unsafe { &*self.data[index].as_ptr() }) }
     }
 
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
     #[must_use]
+    #[inline]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index >= self.length {
             None
@@ -172,7 +177,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns (and removes) the last element from the vector if the predicate returns true,
     /// or [`None`] if the vector is empty or the predicate returns false.
     #[must_use]
-    #[inline]
     pub fn pop_if(&mut self, predicate: impl FnOnce(&T) -> bool) -> Option<T> {
         if self.length == 0 {
             None
