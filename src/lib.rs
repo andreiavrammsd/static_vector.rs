@@ -79,6 +79,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// Returns [`CapacityExceededError`] if the vector is already at full capacity.
     #[inline]
+    #[doc(alias = "add")]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
         if self.length == CAPACITY {
             return Err(CapacityExceededError);
