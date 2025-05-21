@@ -451,7 +451,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     pub const fn as_slice(&self) -> &[T] {
-        // SAFETY: A correct length is used to not access unintialized elements.
+        // SAFETY: A correct length is used to not access uninitialized elements.
         unsafe { slice::from_raw_parts(self.data[0].as_ptr(), self.len()) }
     }
 
@@ -472,7 +472,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # }
     /// ```
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
-        // SAFETY: A correct length is used to not access unintialized elements.
+        // SAFETY: A correct length is used to not access uninitialized elements.
         unsafe { slice::from_raw_parts_mut(self.data[0].as_mut_ptr(), self.len()) }
     }
 
