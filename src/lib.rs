@@ -70,6 +70,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns whether the vector has no elements or any.
+    #[must_use]
     #[inline]
     pub const fn is_empty(&self) -> bool {
         self.length == 0
