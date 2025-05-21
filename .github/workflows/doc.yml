@@ -1,0 +1,34 @@
+name: DOC
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || (github.ref_name == '' && 'master' || github.ref_name) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          .github/doc/doc.py generate --branch ${BRANCH_NAME}
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/rendered-doc
+          publish_branch: gh-pages
+        if: github.ref_type == 'tag' || github.ref == 'refs/heads/master'
