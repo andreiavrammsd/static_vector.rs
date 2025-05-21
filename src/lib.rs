@@ -56,6 +56,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector can contain.
+    #[must_use]
     #[inline]
     #[doc(alias("max", "size", "limit", "length"))]
     pub const fn capacity(&self) -> usize {

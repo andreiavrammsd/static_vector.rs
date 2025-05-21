@@ -6,6 +6,7 @@ fn main() {
     let mut vec = Vec::<i32, 1>::new();
     vec.is_empty();
     vec.is_full();
+    vec.capacity();
     vec.len();
     vec.push(&1);
     vec.set_len(1);
