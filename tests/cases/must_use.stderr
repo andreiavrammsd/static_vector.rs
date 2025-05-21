@@ -184,13 +184,35 @@ help: use `let _ = ...` to ignore the resulting value
 22 |     let _ = vec.iter_mut();
    |     +++++++
 
-error: unused return value of `static_vector::Vec::<T, CAPACITY>::new` that must be used
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::as_slice` that must be used
+  --> tests/cases/must_use.rs:23:5
+   |
+23 |     vec.as_slice();
+   |     ^^^^^^^^^^^^^^
+   |
+help: use `let _ = ...` to ignore the resulting value
+   |
+23 |     let _ = vec.as_slice();
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::as_mut_slice` that must be used
   --> tests/cases/must_use.rs:24:5
    |
-24 |     Vec::<i32, 1>::new();
+24 |     vec.as_mut_slice();
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+help: use `let _ = ...` to ignore the resulting value
+   |
+24 |     let _ = vec.as_mut_slice();
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::new` that must be used
+  --> tests/cases/must_use.rs:26:5
+   |
+26 |     Vec::<i32, 1>::new();
    |     ^^^^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-24 |     let _ = Vec::<i32, 1>::new();
+26 |     let _ = Vec::<i32, 1>::new();
    |     +++++++

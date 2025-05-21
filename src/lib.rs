@@ -27,6 +27,10 @@ pub struct Vec<T: Clone, const CAPACITY: usize> {
 
 impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
     /// Creates an empty [`Vec`]. Equivalent to [`Vec::new()`].
+    ///
+    /// # Panics
+    ///
+    /// Panics if `CAPACITY == 0`. Zero-capacity vectors are not supported.
     #[inline]
     fn default() -> Self {
         Self::new()
@@ -35,6 +39,13 @@ impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
 
 impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `CAPACITY == 0`. Zero-capacity vectors are not supported.
+    ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -45,12 +56,16 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     pub const fn new() -> Self {
+        assert!(CAPACITY > 0, "CAPACITY must be greater than 0");
+
         // SAFETY: The elements in the array are not accessed before beign initialized.
         let data = unsafe { MaybeUninit::<[MaybeUninit<T>; CAPACITY]>::uninit().assume_init() };
         Self { data, length: 0 }
     }
 
     /// Returns the maximum number of elements the vector can contain.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// # use static_vector::Vec;
@@ -72,6 +87,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns the number of elements the vector currently contains.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -91,6 +108,9 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns whether the vector has no elements.
+    ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -108,6 +128,9 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns whether the vector is at maximum capacity.
+    ///
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// # use static_vector::Vec;
@@ -130,6 +153,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`CapacityError`] if the vector is already at full capacity.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use static_vector::{CapacityError, Vec};
@@ -179,6 +204,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Removes all elements. Size will be zero.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -206,6 +233,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`CapacityError`] if `new_length` exceeds the vector's fixed capacity.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -260,6 +289,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a reference to the first element in the vector, or [`None`] if the vector is empty.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -284,6 +315,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a mutable reference to the first element in the vector, or [`None`] if the vector is empty.
     ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -303,6 +336,9 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
+    ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -322,6 +358,9 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a mutable reference to the last element in the vector, or [`None`] if the vector is empty.
+    ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -341,6 +380,9 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
+    ///
+    /// # Examples
+    ///
     /// ```rust
     /// # use static_vector::Vec;
     /// # fn main() {
@@ -371,6 +413,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
+    ///
+    /// # Examples
     ///
     /// ```rust
     /// # use static_vector::Vec;
@@ -451,7 +495,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     pub const fn as_slice(&self) -> &[T] {
-        // SAFETY: A correct length is used to not access uninitialized elements.
+        // SAFETY: A correct length is used to avoid accessing uninitialized elements.
         unsafe { slice::from_raw_parts(self.data[0].as_ptr(), self.len()) }
     }
 
@@ -471,8 +515,10 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// }
     /// # }
     /// ```
+    #[must_use]
+    #[inline]
     pub const fn as_mut_slice(&mut self) -> &mut [T] {
-        // SAFETY: A correct length is used to not access uninitialized elements.
+        // SAFETY: A correct length is used to avoid accessing uninitialized elements.
         unsafe { slice::from_raw_parts_mut(self.data[0].as_mut_ptr(), self.len()) }
     }
 
@@ -605,21 +651,15 @@ mod tests {
     }
 
     #[test]
-    fn zero_capacity() {
-        let mut empty = Vec::<i32, 0>::new();
-        assert_eq!(empty.capacity(), 0);
-        assert_eq!(empty.len(), 0);
-        assert!(empty.is_empty());
-        assert!(empty.is_full());
-        assert!(empty.push(&0).is_err());
-        assert!(empty.set_len(0).is_ok());
-        assert!(empty.set_len(1).is_err());
-        assert!(empty.first().is_none());
-        assert!(empty.last().is_none());
-        assert!(empty.get(0).is_none());
-        assert!(empty.get_mut(0).is_none());
-        assert!(empty.pop().is_none());
-        assert_eq!(empty.iter().count(), 0);
+    #[should_panic(expected = "CAPACITY must be greater than 0")]
+    fn new_with_capacity_zero() {
+        let _ = Vec::<i32, 0>::new();
+    }
+
+    #[test]
+    #[should_panic(expected = "CAPACITY must be greater than 0")]
+    fn default_with_capacity_zero() {
+        let _ = Vec::<i32, 0>::default();
     }
 
     #[test]
@@ -872,6 +912,14 @@ mod tests {
     #[test]
     fn as_slice() {
         let mut vec = Vec::<i32, 1000>::new();
+
+        assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 0);
+        assert_eq!(vec.as_slice().iter().sum::<i32>(), 0);
+
+        vec.push(&10).unwrap();
+        assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 10);
+        assert_eq!(vec.as_slice().iter().sum::<i32>(), 10);
+
         vec.set_len(1000).unwrap();
         vec.as_mut_slice().fill_with(|| 2);
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 2000);

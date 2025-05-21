@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/andreiavrammsd/static_vector.rs/graph/badge.svg?token=pCcpya0mZC)](https://codecov.io/gh/andreiavrammsd/static_vector.rs)
 [![documentation](https://img.shields.io/badge/Documentation-static_vector-4EC820.svg)](https://andreiavrammsd.github.io/static_vector.rs/)
 
-A no-std, stack-allocated vector with fixed capacity and dynamic length.
+A no-std, stack-allocated vector with fixed capacity and dynamic length: `static_vector::Vec::<T, CAPACITY>`.
 
 [`Vec`] stores elements on the stack using a fixed-size array without heap allocations.
 
@@ -21,7 +21,7 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 - Compile-time enforced capacity
 
 ## Requirements
-
+- `CAPACITY` > 0, otherwise [`Vec::new()`] panics 
 - `T: Clone` for insertion: [`Vec::push()`]
 - `T: Default` only if [`Vec::set_len()`] is used
 

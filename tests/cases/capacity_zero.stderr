@@ -1,0 +1,19 @@
+error[E0080]: evaluation of constant value failed
+ --> tests/cases/capacity_zero.rs:6:30
+  |
+6 |     const NEW: Vec<i32, 0> = Vec::new();
+  |                              ^^^^^^^^^^ evaluation panicked: CAPACITY must be greater than 0
+  |
+note: inside `static_vector::Vec::<i32, 0>::new`
+ --> src/lib.rs
+  |
+  |         assert!(CAPACITY > 0, "CAPACITY must be greater than 0");
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the failure occurred here
+
+error[E0015]: cannot call non-const associated function `<static_vector::Vec<i32, 0> as Default>::default` in constants
+ --> tests/cases/capacity_zero.rs:7:34
+  |
+7 |     const DEFAULT: Vec<i32, 0> = Vec::default();
+  |                                  ^^^^^^^^^^^^^^
+  |
+  = note: calls in constants are limited to constant functions, tuple structs and tuple variants

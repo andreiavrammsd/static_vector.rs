@@ -20,6 +20,8 @@ fn main() {
     vec.pop_if(|&_i32| true);
     vec.iter();
     vec.iter_mut();
+    vec.as_slice();
+    vec.as_mut_slice();
 
     Vec::<i32, 1>::new();
 }
