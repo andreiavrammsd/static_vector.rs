@@ -63,16 +63,25 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector currenly contains.
+    #[must_use]
     #[inline]
     #[doc(alias("length", "size"))]
     pub const fn len(&self) -> usize {
         self.length
     }
 
-    /// Returns whether the vector is empty or not.
+    /// Returns whether the vector has no elements or any.
+    #[must_use]
     #[inline]
     pub const fn is_empty(&self) -> bool {
         self.length == 0
+    }
+
+    /// Returns whether the vector is at maximum capacity.
+    #[must_use]
+    #[inline]
+    pub const fn is_full(&self) -> bool {
+        self.len() == self.capacity()
     }
 
     /// Adds a clone of the given `value` to the end of the vector.
@@ -83,7 +92,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("add", "append", "insert"))]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
-        if self.length == CAPACITY {
+        if self.is_full() {
             return Err(CapacityExceededError);
         }
 
@@ -137,7 +146,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("front", "head", "start"))]
     pub const fn first(&self) -> Option<&T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             // SAFETY:
@@ -153,7 +162,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("back", "tail", "end"))]
     pub const fn last(&self) -> Option<&T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             // SAFETY:
@@ -201,7 +210,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("remove", "get"))]
     pub const fn pop(&mut self) -> Option<T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             self.length -= 1;
@@ -373,6 +382,7 @@ mod tests {
         assert_eq!(empty.capacity(), 0);
         assert_eq!(empty.len(), 0);
         assert!(empty.is_empty());
+        assert!(empty.is_full());
         assert!(empty.push(&0).is_err());
         assert!(empty.set_len(0).is_ok());
         assert!(empty.set_len(1).is_err());
@@ -417,15 +427,18 @@ mod tests {
         let mut vec = Vec::<i32, 3>::new();
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
+        assert!(!vec.is_full());
 
         vec.push(&1).unwrap();
         vec.push(&2).unwrap();
         assert_eq!(vec.len(), 2);
         assert!(!vec.is_empty());
+        assert!(!vec.is_full());
 
         assert!(vec.set_len(1).is_ok());
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
+        assert!(!vec.is_full());
 
         assert!(matches!(vec.set_len(100), Err(LengthTooLargeError)));
         assert_eq!(
@@ -433,10 +446,15 @@ mod tests {
             "attempted to resize the vector to a length greater than its fixed capacity"
         );
         assert_is_core_error::<LengthTooLargeError>();
+        assert!(!vec.is_full());
 
         vec.clear();
+        assert!(!vec.is_full());
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
+
+        vec.set_len(vec.capacity()).unwrap();
+        assert!(vec.is_full());
     }
 
     #[test]

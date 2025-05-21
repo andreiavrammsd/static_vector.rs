@@ -1,8 +1,8 @@
-error: unused return value of `static_vector::Vec::<T, CAPACITY>::first` that must be used
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::is_empty` that must be used
  --> tests/cases/must_use.rs:7:5
   |
-7 |     vec.first();
-  |     ^^^^^^^^^^^
+7 |     vec.is_empty();
+  |     ^^^^^^^^^^^^^^
   |
 note: the lint level is defined here
  --> tests/cases/must_use.rs:1:9
@@ -12,95 +12,152 @@ note: the lint level is defined here
   = note: `#[deny(unused_must_use)]` implied by `#[deny(warnings)]`
 help: use `let _ = ...` to ignore the resulting value
   |
-7 |     let _ = vec.first();
+7 |     let _ = vec.is_empty();
   |     +++++++
 
-error: unused return value of `static_vector::Vec::<T, CAPACITY>::last` that must be used
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::is_full` that must be used
  --> tests/cases/must_use.rs:8:5
   |
-8 |     vec.last();
-  |     ^^^^^^^^^^
+8 |     vec.is_full();
+  |     ^^^^^^^^^^^^^
   |
 help: use `let _ = ...` to ignore the resulting value
   |
-8 |     let _ = vec.last();
+8 |     let _ = vec.is_full();
   |     +++++++
 
-error: unused return value of `static_vector::Vec::<T, CAPACITY>::get` that must be used
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::len` that must be used
  --> tests/cases/must_use.rs:9:5
   |
-9 |     vec.get(0);
-  |     ^^^^^^^^^^
+9 |     vec.len();
+  |     ^^^^^^^^^
   |
 help: use `let _ = ...` to ignore the resulting value
   |
-9 |     let _ = vec.get(0);
+9 |     let _ = vec.len();
   |     +++++++
 
-error: unused return value of `static_vector::Vec::<T, CAPACITY>::get_mut` that must be used
+error: unused `Result` that must be used
   --> tests/cases/must_use.rs:10:5
    |
-10 |     vec.get_mut(0);
+10 |     vec.push(&1);
+   |     ^^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+   |
+10 |     let _ = vec.push(&1);
+   |     +++++++
+
+error: unused `Result` that must be used
+  --> tests/cases/must_use.rs:11:5
+   |
+11 |     vec.set_len(1);
+   |     ^^^^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+   |
+11 |     let _ = vec.set_len(1);
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::first` that must be used
+  --> tests/cases/must_use.rs:12:5
+   |
+12 |     vec.first();
+   |     ^^^^^^^^^^^
+   |
+help: use `let _ = ...` to ignore the resulting value
+   |
+12 |     let _ = vec.first();
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::last` that must be used
+  --> tests/cases/must_use.rs:13:5
+   |
+13 |     vec.last();
+   |     ^^^^^^^^^^
+   |
+help: use `let _ = ...` to ignore the resulting value
+   |
+13 |     let _ = vec.last();
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::get` that must be used
+  --> tests/cases/must_use.rs:14:5
+   |
+14 |     vec.get(0);
+   |     ^^^^^^^^^^
+   |
+help: use `let _ = ...` to ignore the resulting value
+   |
+14 |     let _ = vec.get(0);
+   |     +++++++
+
+error: unused return value of `static_vector::Vec::<T, CAPACITY>::get_mut` that must be used
+  --> tests/cases/must_use.rs:15:5
+   |
+15 |     vec.get_mut(0);
    |     ^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-10 |     let _ = vec.get_mut(0);
+15 |     let _ = vec.get_mut(0);
    |     +++++++
 
 error: unused return value of `static_vector::Vec::<T, CAPACITY>::pop` that must be used
-  --> tests/cases/must_use.rs:11:5
+  --> tests/cases/must_use.rs:16:5
    |
-11 |     vec.pop();
+16 |     vec.pop();
    |     ^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-11 |     let _ = vec.pop();
+16 |     let _ = vec.pop();
    |     +++++++
 
 error: unused return value of `static_vector::Vec::<T, CAPACITY>::pop_if` that must be used
-  --> tests/cases/must_use.rs:12:5
+  --> tests/cases/must_use.rs:17:5
    |
-12 |     vec.pop_if(|&_i32| true);
+17 |     vec.pop_if(|&_i32| true);
    |     ^^^^^^^^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-12 |     let _ = vec.pop_if(|&_i32| true);
+17 |     let _ = vec.pop_if(|&_i32| true);
    |     +++++++
 
 error: unused `static_vector::Iter` that must be used
-  --> tests/cases/must_use.rs:13:5
+  --> tests/cases/must_use.rs:18:5
    |
-13 |     vec.iter();
+18 |     vec.iter();
    |     ^^^^^^^^^^
    |
    = note: must consume iterator
 help: use `let _ = ...` to ignore the resulting value
    |
-13 |     let _ = vec.iter();
+18 |     let _ = vec.iter();
    |     +++++++
 
 error: unused `static_vector::IterMut` that must be used
-  --> tests/cases/must_use.rs:14:5
+  --> tests/cases/must_use.rs:19:5
    |
-14 |     vec.iter_mut();
+19 |     vec.iter_mut();
    |     ^^^^^^^^^^^^^^
    |
    = note: must consume iterator
 help: use `let _ = ...` to ignore the resulting value
    |
-14 |     let _ = vec.iter_mut();
+19 |     let _ = vec.iter_mut();
    |     +++++++
 
 error: unused return value of `static_vector::Vec::<T, CAPACITY>::new` that must be used
-  --> tests/cases/must_use.rs:16:5
+  --> tests/cases/must_use.rs:21:5
    |
-16 |     Vec::<i32, 1>::new();
+21 |     Vec::<i32, 1>::new();
    |     ^^^^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-16 |     let _ = Vec::<i32, 1>::new();
+21 |     let _ = Vec::<i32, 1>::new();
    |     +++++++

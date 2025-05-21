@@ -4,6 +4,11 @@ use static_vector::Vec;
 
 fn main() {
     let mut vec = Vec::<i32, 1>::new();
+    vec.is_empty();
+    vec.is_full();
+    vec.len();
+    vec.push(&1);
+    vec.set_len(1);
     vec.first();
     vec.last();
     vec.get(0);

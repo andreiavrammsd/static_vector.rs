@@ -20,10 +20,11 @@ coverage-html:
 # - Activate once: F1 -> Coverage Gutters: Watch
 # - Generate coverage when needed: F1 -> Tasks: Run Task -> coverage
 coverage-info:
+	mkdir -p target/llvm-cov
 	cargo llvm-cov --all-features --workspace --lcov --output-path target/llvm-cov/lcov.info 
 
 bench:
-	cargo bench
+	cargo bench --profile release
 	xdg-open target/criterion/push\ and\ clear/report/index.html
 
 doc:
