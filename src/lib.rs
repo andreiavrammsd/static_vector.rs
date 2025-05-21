@@ -56,6 +56,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector can contain.
+    #[must_use]
     #[inline]
     #[doc(alias("max", "size", "limit", "length"))]
     pub const fn capacity(&self) -> usize {
@@ -573,6 +574,8 @@ mod tests {
 
         let even_sum = vec.iter().filter(|v| *v % 2 == 0).sum::<i32>();
         assert_eq!(even_sum, 12);
+
+        assert_eq!(vec.iter().count(), 7);
     }
 
     #[test]
@@ -598,6 +601,8 @@ mod tests {
 
         let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
         assert_eq!(even_sum, 12);
+
+        assert_eq!(vec.iter().count(), 7);
     }
 
     #[test]
