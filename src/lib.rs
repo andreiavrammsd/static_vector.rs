@@ -55,7 +55,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// let vec = Vec::<i32, 10>::new();
     /// const SOME_LIMIT: usize = 5;
     ///     
-    /// if (vec.len() < vec.capacity() - SOME_LIMIT) {
+    /// if vec.len() < vec.capacity() - SOME_LIMIT {
     ///     // do something
     /// }
     /// # }
