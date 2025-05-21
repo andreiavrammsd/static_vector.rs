@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":["CapacityExceededError","Iter","IterMut","LengthTooLargeError","Vec"]};
