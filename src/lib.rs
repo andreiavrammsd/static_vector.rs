@@ -4,31 +4,18 @@
 
 use core::{array, error, fmt, mem::MaybeUninit};
 
-/// Attempted to push to a full vector
+/// Error for when the vector is full or the requested operation would need more space than the capacity.
 #[derive(Debug)]
 #[non_exhaustive]
-pub struct CapacityExceededError;
+pub struct CapacityError;
 
-impl fmt::Display for CapacityExceededError {
+impl fmt::Display for CapacityError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("attempted to push to a full vector")
+        f.write_str("vector capacity error")
     }
 }
 
-impl error::Error for CapacityExceededError {}
-
-/// Attempted to resize the vector to a length greater than its fixed capacity.
-#[derive(Debug)]
-#[non_exhaustive]
-pub struct LengthTooLargeError;
-
-impl fmt::Display for LengthTooLargeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("attempted to resize the vector to a length greater than its fixed capacity")
-    }
-}
-
-impl error::Error for LengthTooLargeError {}
+impl error::Error for CapacityError {}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
 ///
@@ -89,12 +76,12 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`CapacityExceededError`] if the vector is already at full capacity.
+    /// Returns [`CapacityError`] if the vector is already at full capacity.
     #[inline]
     #[doc(alias("add", "append", "insert"))]
-    pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
+    pub fn push(&mut self, value: &T) -> Result<(), CapacityError> {
         if self.is_full() {
-            return Err(CapacityExceededError);
+            return Err(CapacityError);
         }
 
         self.data[self.length].write(value.clone());
@@ -120,14 +107,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`LengthTooLargeError`] if `new_length` exceeds the vector's fixed capacity.
+    /// Returns [`CapacityError`] if `new_length` exceeds the vector's fixed capacity.
     #[doc(alias("resize", "length"))]
-    pub fn set_len(&mut self, new_length: usize) -> Result<(), LengthTooLargeError>
+    pub fn set_len(&mut self, new_length: usize) -> Result<(), CapacityError>
     where
         T: Default,
     {
         if new_length > CAPACITY {
-            return Err(LengthTooLargeError);
+            return Err(CapacityError);
         }
 
         if new_length > self.length {
@@ -414,9 +401,9 @@ mod tests {
         assert!(vec.push(&1).is_ok());
         assert!(vec.push(&2).is_ok());
 
-        assert!(matches!(vec.push(&3), Err(CapacityExceededError)));
-        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "attempted to push to a full vector");
-        assert_is_core_error::<CapacityExceededError>();
+        assert!(matches!(vec.push(&3), Err(CapacityError)));
+        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "vector capacity error");
+        assert_is_core_error::<CapacityError>();
 
         assert_eq!(vec.get(0).unwrap(), &1);
         assert_eq!(vec.get(1).unwrap(), &2);
@@ -441,12 +428,9 @@ mod tests {
         assert!(!vec.is_empty());
         assert!(!vec.is_full());
 
-        assert!(matches!(vec.set_len(100), Err(LengthTooLargeError)));
-        assert_eq!(
-            format!("{}", vec.set_len(100).unwrap_err()),
-            "attempted to resize the vector to a length greater than its fixed capacity"
-        );
-        assert_is_core_error::<LengthTooLargeError>();
+        assert!(matches!(vec.set_len(100), Err(CapacityError)));
+        assert_eq!(format!("{}", vec.set_len(100).unwrap_err()), "vector capacity error");
+        assert_is_core_error::<CapacityError>();
         assert!(!vec.is_full());
 
         vec.clear();
