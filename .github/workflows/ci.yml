@@ -91,16 +91,3 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
-
-  validate:
-    name: wait for jobs
-    runs-on: ubuntu-latest
-    needs:
-      - test
-      - format
-      - clippy
-      - coverage
-    steps:
-      - name: validate
-        run: |
-          echo "Jobs done"

@@ -50,4 +50,3 @@ dev:
 
 	echo Installing cargo-fuzz...
 	cargo install cargo-fuzz
-	rustup install nightly
