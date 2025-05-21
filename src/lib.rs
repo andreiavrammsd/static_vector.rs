@@ -2,7 +2,7 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use core::{array, error, fmt, mem::MaybeUninit};
+use core::{error, fmt, mem::MaybeUninit};
 
 /// Error for when the vector is full or the requested operation would need more space than the capacity.
 #[derive(Debug)]
@@ -42,8 +42,11 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```
     #[must_use]
     #[inline]
-    pub fn new() -> Self {
-        let data: [MaybeUninit<T>; CAPACITY] = array::from_fn(|_| MaybeUninit::uninit());
+    pub const fn new() -> Self {
+        // SAFETY:
+        // We ensure that:
+        // - The elements in the array are no accessed before beign initialized.
+        let data = unsafe { MaybeUninit::<[MaybeUninit<T>; CAPACITY]>::uninit().assume_init() };
         Self { data, length: 0 }
     }
 
