@@ -45,7 +45,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     pub const fn new() -> Self {
         // SAFETY:
         // We ensure that:
-        // - The elements in the array are no accessed before beign initialized.
+        // - The elements in the array are not accessed before beign initialized.
         let data = unsafe { MaybeUninit::<[MaybeUninit<T>; CAPACITY]>::uninit().assume_init() };
         Self { data, length: 0 }
     }
