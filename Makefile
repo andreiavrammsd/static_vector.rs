@@ -1,4 +1,5 @@
 .SILENT:
+.PHONY: fuzz
 
 # VS Code: Ctrl+Shift+B
 all: test fmt lint build-doc
@@ -33,6 +34,9 @@ doc:
 build-doc:
 	cargo doc --no-deps
 
+fuzz:
+	cargo +nightly fuzz run static_vector
+
 dev:
 	echo Installing pre-commit hook...
 	curl -1sLf 'https://dl.cloudsmith.io/public/evilmartians/lefthook/setup.deb.sh' | sudo -E bash
@@ -43,3 +47,7 @@ dev:
 	host=$$(rustc -vV | grep '^host:' | cut -d' ' -f2); \
 	curl --proto '=https' --tlsv1.2 -fsSL "https://github.com/taiki-e/cargo-llvm-cov/releases/latest/download/cargo-llvm-cov-$${host}.tar.gz" \
 		| tar xzf - -C "$$HOME/.cargo/bin"
+
+	echo Installing cargo-fuzz...
+	cargo install cargo-fuzz
+	rustup install nightly

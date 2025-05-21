@@ -1,0 +1,33 @@
+name: FUZZ
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      fuzzseconds:
+        description: "How many seconds to run fuzzing"
+        required: false
+        default: "30"
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          cargo install cargo-fuzz
+          rustup install nightly
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            FUZZSECONDS=600
+          else
+            FUZZSECONDS="${{ inputs.fuzzseconds || '30' }}"
+          fi
+          cargo +nightly fuzz run static_vector -- -max_total_time=$FUZZSECONDS
