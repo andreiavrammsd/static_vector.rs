@@ -279,15 +279,27 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("front", "head", "start"))]
     pub const fn first(&self) -> Option<&T> {
-        if self.is_empty() {
-            None
-        } else {
-            // SAFETY:
-            // We ensure that:
-            // - `0` is within bounds of `self.data`.
-            // - The element at `0` has been initialized.
-            Some(unsafe { &*self.data[0].as_ptr() })
-        }
+        self.get(0)
+    }
+
+    /// Returns a mutable reference to the first element in the vector, or [`None`] if the vector is empty.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///     
+    /// if let Some(num) = vec.first_mut() {
+    ///    *num = 1;
+    ///    let _ = num;
+    /// }
+    /// # }
+    /// ```
+    #[must_use]
+    #[inline]
+    #[doc(alias("front", "head", "start"))]
+    pub const fn first_mut(&mut self) -> Option<&mut T> {
+        self.get_mut(0)
     }
 
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
@@ -306,15 +318,26 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("back", "tail", "end"))]
     pub const fn last(&self) -> Option<&T> {
-        if self.is_empty() {
-            None
-        } else {
-            // SAFETY:
-            // We ensure that:
-            // - `self.length - 1` is within bounds of `self.data`.
-            // - The element at `self.length - 1` has been initialized.
-            Some(unsafe { &*self.data[self.length - 1].as_ptr() })
-        }
+        if self.is_empty() { None } else { self.get(self.len() - 1) }
+    }
+
+    /// Returns a mutable reference to the last element in the vector, or [`None`] if the vector is empty.
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///
+    /// if let Some(num) = vec.last_mut() {
+    ///    *num = 1;
+    ///    let _ = num;
+    /// }
+    /// # }
+    /// ```
+    #[must_use]
+    #[inline]
+    #[doc(alias("back", "tail", "end"))]
+    pub const fn last_mut(&mut self) -> Option<&mut T> {
+        if self.is_empty() { None } else { self.get_mut(self.len() - 1) }
     }
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
@@ -364,7 +387,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("at", "index"))]
     pub const fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-        if index >= self.length {
+        if index >= self.len() {
             None
         } else {
             // SAFETY:
@@ -625,7 +648,7 @@ mod tests {
     }
 
     #[test]
-    fn get() {
+    fn get_immutable() {
         let mut vec = Vec::<i32, 4>::new();
         assert!(vec.first().is_none());
         assert!(vec.last().is_none());
@@ -644,12 +667,37 @@ mod tests {
         assert_eq!(vec.get(1).unwrap(), &2);
         assert_eq!(vec.get(2).unwrap(), &3);
         assert!(vec.get(3).is_none());
+    }
 
+    #[test]
+    fn get_mutable() {
+        let mut vec = Vec::<i32, 4>::new();
+        assert!(vec.first_mut().is_none());
+        assert!(vec.last_mut().is_none());
+        assert!(vec.get_mut(0).is_none());
+
+        vec.push(&1).unwrap();
+        assert_eq!(vec.first_mut().unwrap(), &1);
         assert_eq!(vec.get_mut(0).unwrap(), &1);
-        *vec.get_mut(0).unwrap() = 5;
-        assert_eq!(vec.get(0).unwrap(), &5);
-        assert_eq!(vec.get_mut(0).unwrap(), &5);
+        assert_eq!(vec.last_mut().unwrap(), &1);
+
+        vec.push(&2).unwrap();
+        vec.push(&3).unwrap();
+        assert_eq!(vec.first_mut().unwrap(), &1);
+        assert_eq!(vec.last_mut().unwrap(), &3);
+        assert_eq!(vec.get_mut(0).unwrap(), &1);
+        assert_eq!(vec.get_mut(1).unwrap(), &2);
+        assert_eq!(vec.get_mut(2).unwrap(), &3);
         assert!(vec.get_mut(3).is_none());
+
+        *vec.get_mut(0).unwrap() = 5;
+        assert_eq!(vec.get_mut(0).unwrap(), &5);
+
+        *vec.first_mut().unwrap() = 15;
+        assert_eq!(vec.first_mut().unwrap(), &15);
+
+        *vec.last_mut().unwrap() = 25;
+        assert_eq!(vec.last_mut().unwrap(), &25);
     }
 
     #[test]

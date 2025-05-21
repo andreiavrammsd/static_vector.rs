@@ -11,7 +11,9 @@ fn main() {
     vec.push(&1);
     vec.set_len(1);
     vec.first();
+    vec.first_mut();
     vec.last();
+    vec.last_mut();
     vec.get(0);
     vec.get_mut(0);
     vec.pop();
