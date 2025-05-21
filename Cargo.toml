@@ -1,15 +1,18 @@
 [package]
 name = "static_vector"
 version = "0.2.0"
+authors = ["Andrei Avram"]
+rust-version = "1.85.1"
 edition = "2024"
 description = "A no-std, stack-allocated vector with fixed capacity and dynamic length"
-repository = "https://github.com/andreiavrammsd/static_vector.rs"
+documentation = "https://andreiavrammsd.github.io/static_vector.rs"
 readme = "README.md"
+homepage = "https://github.com/andreiavrammsd/static_vector.rs"
+repository = "https://github.com/andreiavrammsd/static_vector.rs"
 license = "MIT"
 keywords = ["vector"]
 categories = ["data-structures", "no-std"]
 publish = false
-rust-version = "1.85.1"
 
 [profile.dev]
 overflow-checks = true
