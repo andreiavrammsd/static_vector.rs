@@ -1,6 +1,6 @@
 [package]
 name = "static_vector"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "A no-std, stack-allocated vector with fixed capacity and dynamic length"
 repository = "https://github.com/andreiavrammsd/static_vector.rs"
