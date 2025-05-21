@@ -23,7 +23,7 @@ coverage-info:
 	cargo llvm-cov --all-features --workspace --lcov --output-path target/llvm-cov/lcov.info 
 
 bench:
-	cargo bench
+	cargo bench --profile release
 	xdg-open target/criterion/push\ and\ clear/report/index.html
 
 doc:
