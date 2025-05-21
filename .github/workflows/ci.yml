@@ -50,23 +50,6 @@ jobs:
           components: rustfmt
       - run: cargo fmt --all -- --check
 
-  doc:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo doc --no-deps
-      - run: cp .github/doc/index.html target/doc/index.html
-        if: github.ref == 'refs/heads/master'
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/doc
-          publish_branch: gh-pages
-        if: github.ref == 'refs/heads/master'
-
   clippy:
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +100,6 @@ jobs:
       - format
       - clippy
       - coverage
-      - doc
     steps:
       - name: validate
         run: |

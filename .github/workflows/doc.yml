@@ -1,0 +1,37 @@
+name: DOC
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              VERSION="pr"
+            elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+              VERSION="${{ github.ref_name }}"
+            else
+              VERSION="latest"
+          fi
+          .github/doc/doc.py generate --version $VERSION
+          .github/doc/doc.py index
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc-rendered
+          publish_branch: gh-pages
+        #if: github.ref_type == "tag" || github.ref == "refs/heads/master"
