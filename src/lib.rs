@@ -5,6 +5,8 @@
 use core::{error, fmt, mem::MaybeUninit};
 
 /// Error for when the vector is full or the requested operation would need more space than the capacity.
+///
+/// See [`Vec::push()`] example for usage.
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct CapacityError;
