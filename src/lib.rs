@@ -325,7 +325,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///         let _ = num;
     ///     },
     ///     None => {
-    ///         // no first element
+    ///         // element with index 22 does not exist
     ///     },
     /// }
     /// # }
