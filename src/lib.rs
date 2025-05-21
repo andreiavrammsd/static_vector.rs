@@ -18,8 +18,6 @@ impl fmt::Display for CapacityError {
 impl error::Error for CapacityError {}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
-///
-/// See crate-level documentation for details and usage.
 pub struct Vec<T: Clone, const CAPACITY: usize> {
     data: [MaybeUninit<T>; CAPACITY],
     length: usize,
@@ -35,6 +33,13 @@ impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
 
 impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let _ = Vec::<i32, 20>::new();
+    /// // use vector API
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     pub fn new() -> Self {
@@ -43,6 +48,18 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns the maximum number of elements the vector can contain.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let vec = Vec::<i32, 10>::new();
+    /// const SOME_LIMIT: usize = 5;
+    ///     
+    /// if (vec.len() < vec.capacity() - SOME_LIMIT) {
+    ///     // do something
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("max", "size", "limit", "length"))]
@@ -50,7 +67,19 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         CAPACITY
     }
 
-    /// Returns the maximum number of elements the vector currenly contains.
+    /// Returns the number of elements the vector currenly contains.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    /// const SOME_LIMIT: usize = 5;
+    ///
+    /// if vec.len() < SOME_LIMIT {
+    ///     // do something
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("length", "size"))]
@@ -58,7 +87,17 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         self.length
     }
 
-    /// Returns whether the vector has no elements or any.
+    /// Returns whether the vector has no elements.
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///
+    /// if vec.is_empty() {
+    ///     // do something
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     pub const fn is_empty(&self) -> bool {
@@ -66,6 +105,17 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns whether the vector is at maximum capacity.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///
+    /// if vec.is_full() {
+    ///     // do something
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     pub const fn is_full(&self) -> bool {
@@ -77,6 +127,38 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`CapacityError`] if the vector is already at full capacity.
+    ///
+    /// ```rust
+    /// use static_vector::{CapacityError, Vec};
+    ///
+    /// #[derive(Debug)]
+    /// enum AppError {
+    ///     VectorCapacityError(CapacityError),
+    /// }
+    ///
+    /// fn my_fn(vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
+    ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
+    ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
+    ///     vec.push(&3).map_err(AppError::VectorCapacityError)?;
+    ///
+    ///     // other operations that could return errors
+    ///     Ok(())
+    /// }
+    ///
+    /// fn main() -> Result<(), AppError> {
+    ///     let mut vec = Vec::<i32, 2>::new();
+    ///
+    ///     if let Err(err) = my_fn(&mut vec) {
+    ///         match err {
+    ///             AppError::VectorCapacityError(_) => {
+    ///                 // handle case
+    ///             },
+    ///         }
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     #[inline]
     #[doc(alias("add", "append", "insert"))]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityError> {
@@ -91,6 +173,17 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Removes all elements. Size will be zero.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///
+    /// // add some elements
+    /// vec.clear();
+    /// // elements will be gone
+    /// # }
+    /// ```
     #[inline]
     #[doc(alias("reset", "remove", "truncate", "empty"))]
     pub fn clear(&mut self) {
@@ -108,6 +201,37 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Errors
     ///
     /// Returns [`CapacityError`] if `new_length` exceeds the vector's fixed capacity.
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// #[derive(Debug)]
+    /// enum AppError {
+    ///     MyFnError
+    /// }
+    ///
+    /// fn my_fn(vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
+    ///     vec.set_len(100).map_err(|_| AppError::MyFnError)?;
+    ///
+    ///     // other operations that could return errors
+    ///
+    ///     Ok(())
+    /// }
+    ///
+    /// fn main() -> Result<(), AppError> {
+    ///     let mut vec = Vec::<i32, 2>::new();
+    ///
+    ///     if let Err(err) = my_fn(&mut vec) {
+    ///         match err {
+    ///             AppError::MyFnError => {
+    ///                 // handle case
+    ///             },
+    ///         }
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     #[doc(alias("resize", "length"))]
     pub fn set_len(&mut self, new_length: usize) -> Result<(), CapacityError>
     where
@@ -130,6 +254,22 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a reference to the first element in the vector, or [`None`] if the vector is empty.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///     
+    /// match vec.first() {
+    ///     Some(num) => {
+    ///         let _ = num;
+    ///     },
+    ///     None => {
+    ///         // no first element
+    ///     },
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("front", "head", "start"))]
@@ -146,6 +286,17 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///     
+    /// if let Some(num) = vec.last() {
+    ///     let _ = num;
+    ///     // do something with the last element
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("back", "tail", "end"))]
@@ -162,6 +313,21 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///     
+    /// match vec.get(22) {
+    ///     Some(num) => {
+    ///         let _ = num;
+    ///     },
+    ///     None => {
+    ///         // no first element
+    ///     },
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("at", "index"))]
@@ -178,6 +344,17 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 2>::new();
+    ///     
+    /// if vec.push(&1).is_ok() {
+    ///     *vec.get_mut(0).unwrap() = 5;
+    /// }
+    /// # }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("at", "index"))]
