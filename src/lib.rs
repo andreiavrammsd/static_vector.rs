@@ -2,7 +2,7 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use core::{error, fmt, mem::MaybeUninit};
+use core::{error, fmt, mem::MaybeUninit, slice};
 
 /// Error for when the vector is full or the requested operation would need more space than the capacity.
 ///
@@ -45,9 +45,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[must_use]
     #[inline]
     pub const fn new() -> Self {
-        // SAFETY:
-        // We ensure that:
-        // - The elements in the array are not accessed before beign initialized.
+        // SAFETY: The elements in the array are not accessed before beign initialized.
         let data = unsafe { MaybeUninit::<[MaybeUninit<T>; CAPACITY]>::uninit().assume_init() };
         Self { data, length: 0 }
     }
@@ -366,7 +364,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
             None
         } else {
             // SAFETY:
-            // We ensure that:
             // - `index` is within bounds of `self.data`.
             // - The element at `index` has been initialized.
             Some(unsafe { &*self.data[index].as_ptr() })
@@ -393,7 +390,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
             None
         } else {
             // SAFETY:
-            // We ensure that:
             // - `index` is within bounds of `self.data`.
             // - The element at `index` has been initialized.
             Some(unsafe { &mut *self.data[index].as_mut_ptr() })
@@ -411,7 +407,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
             self.length -= 1;
 
             // SAFETY:
-            // We ensure that:
             // - `self.length` is within bounds of `self.data`.
             // - The element at `self.length` has been initialized.
             Some(unsafe { self.data[self.length].assume_init_read() })
@@ -440,12 +435,52 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         IterMut::new(&mut self.data, self.length)
     }
 
+    /// Returns a slice of the entire vector.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let vec = Vec::<i32, 2>::new();
+    ///     
+    /// if vec.as_slice().binary_search(&1).is_ok() {
+    ///     // found it
+    /// }
+    /// # }
+    #[must_use]
+    #[inline]
+    pub const fn as_slice(&self) -> &[T] {
+        // SAFETY: A correct length is used to not access unintialized elements.
+        unsafe { slice::from_raw_parts(self.data[0].as_ptr(), self.len()) }
+    }
+
+    /// Returns a mutable slice of the entire vector.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use static_vector::Vec;
+    /// # fn main() {
+    /// let mut vec = Vec::<i32, 10>::new();
+    ///     
+    /// if vec.set_len(5).is_ok() {
+    ///     vec.as_mut_slice().fill_with(|| 1);
+    /// } else {
+    ///     // handle error
+    /// }
+    /// # }
+    /// ```
+    pub const fn as_mut_slice(&mut self) -> &mut [T] {
+        // SAFETY: A correct length is used to not access unintialized elements.
+        unsafe { slice::from_raw_parts_mut(self.data[0].as_mut_ptr(), self.len()) }
+    }
+
     /// Drops all elements in given range. Needed when elements are considered to be going out of scope.
     /// E.g.: when the vector is going out of scope, when methods such as [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
         for i in from..to {
             // SAFETY:
-            // We ensure that:
             // - `i` is within bounds of `self.data`.
             // - The element at `i` has been initialized.
             unsafe {
@@ -487,7 +522,6 @@ impl<'a, T> Iterator for Iter<'a, T> {
             None
         } else {
             // SAFETY:
-            // We ensure that:
             // - `self.index` is within bounds of `self.data`.
             // - The element at `self.index` has been initialized.
             let value = unsafe { &*self.data[self.index].as_ptr() };
@@ -532,7 +566,6 @@ impl<'a, T> Iterator for IterMut<'a, T> {
             None
         } else {
             // SAFETY:
-            // We ensure that:
             // - `self.index` is within bounds of `self.data`.
             // - The element at `self.index` has been initialized.
             let value = unsafe { &mut *self.data[self.index].as_mut_ptr() };
@@ -834,6 +867,14 @@ mod tests {
             s += *i;
         }
         assert_eq!(s, 56);
+    }
+
+    #[test]
+    fn as_slice() {
+        let mut vec = Vec::<i32, 1000>::new();
+        vec.set_len(1000).unwrap();
+        vec.as_mut_slice().fill_with(|| 2);
+        assert_eq!(vec.as_slice().iter().sum::<i32>(), 2000);
     }
 
     #[test]

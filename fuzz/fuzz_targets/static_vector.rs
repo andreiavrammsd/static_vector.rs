@@ -56,6 +56,9 @@ fuzz_target!(|data: &[u8]| {
         }
     }
 
+    vec.as_mut_slice().fill_with(|| 1);
+    assert_eq!(vec.as_slice().iter().sum::<u8>(), vec.len() as u8);
+
     vec.clear();
     for &byte in data {
         assert!(vec.push(&byte).is_ok());
