@@ -92,7 +92,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("add", "append", "insert"))]
     pub fn push(&mut self, value: &T) -> Result<(), CapacityExceededError> {
-        if self.length == CAPACITY {
+        if self.is_full() {
             return Err(CapacityExceededError);
         }
 
@@ -146,7 +146,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("front", "head", "start"))]
     pub const fn first(&self) -> Option<&T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             // SAFETY:
@@ -162,7 +162,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("back", "tail", "end"))]
     pub const fn last(&self) -> Option<&T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             // SAFETY:
@@ -210,7 +210,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("remove", "get"))]
     pub const fn pop(&mut self) -> Option<T> {
-        if self.length == 0 {
+        if self.is_empty() {
             None
         } else {
             self.length -= 1;
