@@ -21,10 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
       - run: |
           cargo install cargo-fuzz
-          rustup install nightly
           if [ "${{ github.event_name }}" = "schedule" ]; then
             FUZZSECONDS=600
           else
