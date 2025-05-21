@@ -11,7 +11,7 @@ pub struct CapacityError;
 
 impl fmt::Display for CapacityError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("vector capacity error")
+        f.write_str("vector needs larger capacity")
     }
 }
 
@@ -67,7 +67,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         CAPACITY
     }
 
-    /// Returns the number of elements the vector currenly contains.
+    /// Returns the number of elements the vector currently contains.
     ///
     /// ```rust
     /// # use static_vector::Vec;
@@ -139,6 +139,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// fn my_fn(vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
     ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
     ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
+    ///
+    ///     // third push will fail because vector capacity is 2
     ///     vec.push(&3).map_err(AppError::VectorCapacityError)?;
     ///
     ///     // other operations that could return errors
@@ -579,7 +581,7 @@ mod tests {
         assert!(vec.push(&2).is_ok());
 
         assert!(matches!(vec.push(&3), Err(CapacityError)));
-        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "vector capacity error");
+        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
 
         assert_eq!(vec.get(0).unwrap(), &1);
@@ -606,7 +608,7 @@ mod tests {
         assert!(!vec.is_full());
 
         assert!(matches!(vec.set_len(100), Err(CapacityError)));
-        assert_eq!(format!("{}", vec.set_len(100).unwrap_err()), "vector capacity error");
+        assert_eq!(format!("{}", vec.set_len(100).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
         assert!(!vec.is_full());
 
