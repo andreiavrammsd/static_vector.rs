@@ -34,6 +34,14 @@ All operations are O(1) except:
 | `clear`     | O(current length)                | O(1)                            |
 | `set_len`   | O(new length - current length)   | O(new length - current length)  |
 
+## Add to project
+
+```bash
+cargo add static_vector --git https://github.com/andreiavrammsd/static_vector.rs
+```
+
+This crate is not published on [crates.io](https://crates.io/).
+
 ## Example
 
 ```rust
