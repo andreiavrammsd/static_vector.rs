@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["CapacityError","Iter","IterMut","Vec"]};
