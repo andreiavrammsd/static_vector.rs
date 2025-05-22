@@ -25,9 +25,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: |
           .github/doc/doc.py ${BRANCH_NAME}
+          ls -l ./target/docs
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/rendered-doc
+          publish_dir: ./target/docs
           publish_branch: gh-pages
         if: github.ref_type == 'tag' || github.ref == 'refs/heads/master'
