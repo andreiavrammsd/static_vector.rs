@@ -47,11 +47,10 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let _ = Vec::<i32, 20>::new();
     /// // use vector API
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -68,15 +67,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let vec = Vec::<i32, 10>::new();
     /// const SOME_LIMIT: usize = 5;
     ///     
     /// if vec.len() < vec.capacity() - SOME_LIMIT {
     ///     // do something
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -90,15 +88,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     /// const SOME_LIMIT: usize = 5;
     ///
     /// if vec.len() < SOME_LIMIT {
     ///     // do something
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -112,14 +109,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///
     /// if vec.is_empty() {
     ///     // do something
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -133,14 +129,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///
     /// if vec.is_full() {
     ///     // do something
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -207,14 +202,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///
     /// // add some elements
     /// vec.clear();
     /// // elements will be gone
-    /// # }
     /// ```
     #[inline]
     #[doc(alias("reset", "remove", "truncate", "empty"))]
@@ -292,8 +286,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
     /// match vec.first() {
@@ -304,7 +298,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///         // no first element
     ///     },
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -318,15 +311,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
     /// if let Some(num) = vec.first_mut() {
     ///    *num = 1;
     ///    let _ = num;
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -340,15 +332,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
     /// if let Some(num) = vec.last() {
     ///     let _ = num;
     ///     // do something with the last element
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -362,15 +353,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///
     /// if let Some(num) = vec.last_mut() {
     ///    *num = 1;
     ///    let _ = num;
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -384,8 +374,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
     /// match vec.get(22) {
@@ -396,7 +386,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///         // element with index 22 does not exist
     ///     },
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -417,14 +406,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
     /// if vec.push(&1).is_ok() {
     ///     *vec.get_mut(0).unwrap() = 5;
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
@@ -484,14 +472,13 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let vec = Vec::<i32, 2>::new();
     ///     
     /// if vec.as_slice().binary_search(&1).is_ok() {
     ///     // found it
     /// }
-    /// # }
     #[must_use]
     #[inline]
     pub const fn as_slice(&self) -> &[T] {
@@ -504,8 +491,8 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// # Examples
     ///
     /// ```rust
-    /// # use static_vector::Vec;
-    /// # fn main() {
+    /// use static_vector::Vec;
+    ///
     /// let mut vec = Vec::<i32, 10>::new();
     ///     
     /// if vec.set_len(5).is_ok() {
@@ -513,7 +500,6 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// } else {
     ///     // handle error
     /// }
-    /// # }
     /// ```
     #[must_use]
     #[inline]
