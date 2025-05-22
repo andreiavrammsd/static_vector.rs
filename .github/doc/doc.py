@@ -41,6 +41,7 @@ def render_versions(template_path, versions):
 SRC_DIR = ".github/doc"
 DOC_DIR = "target/doc"
 RENDER_DIR = "target/rendered-doc"
+DEV_VERSION = "development"
 
 
 def generate_version(version):
@@ -76,9 +77,8 @@ def generate(args):
         print(version)
 
     shutil.rmtree(RENDER_DIR, ignore_errors=True)
-    create_version_dirs("latest")
-    generate_version("latest")
-
+    create_version_dirs(DEV_VERSION)
+    generate_version(DEV_VERSION)
 
     for version in versions:
         create_version_dirs(version)
@@ -89,7 +89,7 @@ def generate(args):
 
     switch_branch(args.branch)
 
-    index(["latest"] + versions)
+    index([DEV_VERSION] + versions)
 
 
 def main():

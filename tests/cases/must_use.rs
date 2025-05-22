@@ -8,16 +8,20 @@ fn main() {
     vec.is_full();
     vec.capacity();
     vec.len();
-    vec.push(&1);
+    vec.push(1);
     vec.set_len(1);
     vec.first();
+    vec.first_mut();
     vec.last();
+    vec.last_mut();
     vec.get(0);
     vec.get_mut(0);
     vec.pop();
     vec.pop_if(|&_i32| true);
     vec.iter();
     vec.iter_mut();
+    vec.as_slice();
+    vec.as_mut_slice();
 
     Vec::<i32, 1>::new();
 }

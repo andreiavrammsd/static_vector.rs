@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/andreiavrammsd/static_vector.rs/graph/badge.svg?token=pCcpya0mZC)](https://codecov.io/gh/andreiavrammsd/static_vector.rs)
 [![documentation](https://img.shields.io/badge/Documentation-static_vector-4EC820.svg)](https://andreiavrammsd.github.io/static_vector.rs/)
 
-A no-std, stack-allocated vector with fixed capacity and dynamic length.
+A no-std, stack-allocated vector with fixed capacity and dynamic length: `static_vector::Vec::<T, CAPACITY>`.
 
 [`Vec`] stores elements on the stack using a fixed-size array without heap allocations.
 
@@ -21,8 +21,7 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 - Compile-time enforced capacity
 
 ## Requirements
-
-- `T: Clone` for insertion: [`Vec::push()`]
+- `CAPACITY` > 0, otherwise [`Vec::new()`] panics 
 - `T: Default` only if [`Vec::set_len()`] is used
 
 ## Complexity
@@ -34,6 +33,14 @@ All operations are O(1) except:
 | `clear`     | O(current length)                | O(1)                            |
 | `set_len`   | O(new length - current length)   | O(new length - current length)  |
 
+## Add to project
+
+```bash
+cargo add static_vector --git https://github.com/andreiavrammsd/static_vector.rs
+```
+
+This crate is not published on [crates.io](https://crates.io/).
+
 ## Example
 
 ```rust
@@ -41,16 +48,16 @@ use static_vector::Vec;
 
 let mut vec = Vec::<i32, 3>::new();
 
-vec.push(&4).unwrap();
-vec.push(&5).unwrap();
-vec.push(&6).unwrap();
+vec.push(4).unwrap();
+vec.push(5).unwrap();
+vec.push(6).unwrap();
 assert_eq!(vec.len(), 3);
 assert_eq!(vec.first(), Some(&4));
 
 let sum_of_even_numbers = vec.iter().filter(|n| *n % 2 == 0).sum::<i32>();
 assert_eq!(sum_of_even_numbers, 10);
 
-vec.push(&2).unwrap_err();
+vec.push(2).unwrap_err();
 assert_eq!(vec.len(), 3);
 
 match vec.set_len(1) {
@@ -61,6 +68,8 @@ match vec.set_len(1) {
 vec.clear();
 assert!(vec.is_empty());
 ```
+
+See more examples in the documentation of [`Vec`].
 
 ## Development on Linux
 
