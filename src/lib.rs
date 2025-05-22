@@ -49,8 +49,9 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let _ = Vec::<i32, 20>::new();
-    /// // use vector API
+    /// let mut vec = Vec::<i32, 20>::new();
+    /// vec.as_mut_slice().fill(0);
+    /// // now vec has length 20 and all elements are zero
     /// ```
     #[must_use]
     #[inline]
@@ -90,7 +91,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 10>::new();
     /// const SOME_LIMIT: usize = 5;
     ///
     /// if vec.len() < SOME_LIMIT {
@@ -111,7 +112,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 10>::new();
     ///
     /// if vec.is_empty() {
     ///     // do something
@@ -131,10 +132,10 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///
     /// if vec.is_full() {
-    ///     // do something
+    ///     // cannot push elements anymore
     /// }
     /// ```
     #[must_use]
@@ -204,7 +205,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///
     /// // add some elements
     /// vec.clear();
@@ -238,7 +239,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///     MyFnError
     /// }
     ///
-    /// fn my_fn(vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
+    /// fn my_fn(vec: &mut Vec<i32, 200>) -> Result<(), AppError> {
     ///     vec.set_len(100).map_err(|_| AppError::MyFnError)?;
     ///
     ///     // other operations that could return errors
@@ -247,7 +248,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// }
     ///
     /// fn main() -> Result<(), AppError> {
-    ///     let mut vec = Vec::<i32, 2>::new();
+    ///     let mut vec = Vec::<i32, 200>::new();
     ///
     ///     if let Err(err) = my_fn(&mut vec) {
     ///         match err {
@@ -288,7 +289,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///     
     /// match vec.first() {
     ///     Some(num) => {
@@ -313,7 +314,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///     
     /// if let Some(num) = vec.first_mut() {
     ///    *num = 1;
@@ -334,7 +335,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 30>::new();
     ///     
     /// if let Some(num) = vec.last() {
     ///     let _ = num;
@@ -355,7 +356,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///
     /// if let Some(num) = vec.last_mut() {
     ///    *num = 1;
@@ -376,7 +377,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///     
     /// match vec.get(22) {
     ///     Some(num) => {
@@ -408,7 +409,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = Vec::<i32, 2>::new();
+    /// let mut vec = Vec::<i32, 20>::new();
     ///     
     /// if vec.push(1).is_ok() {
     ///     *vec.get_mut(0).unwrap() = 5;
@@ -429,6 +430,32 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns (and removes) the last element from the vector, or [`None`] if the vector is empty.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// let mut vec = Vec::<i32, 20>::new();
+    ///
+    /// // fill vector with number from 1 to 10
+    /// vec.set_len(10).unwrap(); // can unwrap because 10 < 20
+    /// vec.as_mut_slice().fill_with({
+    ///     let mut n = 0;
+    ///     move || {
+    ///         n = n + 1;
+    ///         n
+    ///     }
+    /// });
+    ///
+    /// // print in reverse order while removing from
+    /// while let Some(num) = vec.pop() {
+    ///     print!("{num} ");
+    /// }
+    ///
+    /// // prints: 10 9 8 7 6 5 4 3 2 1
+    /// // the vector is now empty
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("remove", "get"))]
@@ -447,6 +474,22 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns (and removes) the last element from the vector if the predicate returns true,
     /// or [`None`] if the vector is empty or the predicate returns false.
+    /// # Example
+    ///
+    /// Similar to [`Vec::pop()`], but needs a predicate
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// let mut vec = Vec::<i32, 20>::new();
+    ///
+    /// // assuming vector has elements: 10 9 8 7 6 5 4 3 2 1
+    /// if let Some(num) = vec.pop_if(|n| *n % 2 == 0) {
+    ///     println!("{num}");
+    ///     // prints: 10
+    ///     // the vector has remained with: 1 2 3 4 5 6 7 8 9
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     #[doc(alias("remove", "get"))]
@@ -456,12 +499,34 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 
     /// Returns an iterator over immutable references to the elements in the vector.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// let mut vec = Vec::<i32, 20>::new();
+    ///
+    /// vec.iter().map(|n| *n * 2).sum::<i32>();
+    /// ```
     #[inline]
     pub const fn iter(&self) -> Iter<'_, T> {
         Iter::new(&self.data, self.length)
     }
 
     /// Returns an iterator over mutable references to the elements in the vector.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// let mut vec = Vec::<i32, 20>::new();
+    ///
+    /// for num in vec.iter_mut() {
+    ///    *num *= 2;
+    /// }
+    /// ```
     #[inline]
     pub const fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut::new(&mut self.data, self.length)
@@ -474,10 +539,21 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let vec = Vec::<i32, 2>::new();
+    /// fn count_ones(numbers: &[i32]) -> usize {
+    ///     numbers.iter().filter(|n| *n == &1).count()
+    /// }
+    ///
+    /// let vec = Vec::<i32, 1000>::new();
+    ///
+    /// // push numbers into vector
     ///     
     /// if vec.as_slice().binary_search(&1).is_ok() {
     ///     // found it
+    /// }
+    ///
+    /// let ones = count_ones(vec.as_slice());
+    /// if ones > 0 {
+    ///     // ...
     /// }
     #[must_use]
     #[inline]
@@ -496,7 +572,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// let mut vec = Vec::<i32, 10>::new();
     ///     
     /// if vec.set_len(5).is_ok() {
-    ///     vec.as_mut_slice().fill_with(|| 1);
+    ///     vec.as_mut_slice().fill(1);
     /// } else {
     ///     // handle error
     /// }
@@ -843,7 +919,7 @@ mod tests {
     #[test]
     fn iter() {
         let mut vec = Vec::<i32, 10>::new();
-        for i in 1..8 {
+        for i in 1..=7 {
             vec.push(i).unwrap();
         }
 
@@ -856,7 +932,7 @@ mod tests {
     #[test]
     fn into_iter() {
         let mut vec = Vec::<i32, 10>::new();
-        for i in 1..8 {
+        for i in 1..=7 {
             vec.push(i).unwrap();
         }
 
@@ -870,7 +946,7 @@ mod tests {
     #[test]
     fn iter_mut() {
         let mut vec = Vec::<i32, 10>::new();
-        for i in 1..8 {
+        for i in 1..=7 {
             vec.push(i).unwrap();
         }
 
@@ -883,7 +959,7 @@ mod tests {
     #[test]
     fn into_iter_mut() {
         let mut vec = Vec::<i32, 10>::new();
-        for i in 1..8 {
+        for i in 1..=7 {
             vec.push(i).unwrap();
         }
 
@@ -907,7 +983,7 @@ mod tests {
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 10);
 
         vec.set_len(1000).unwrap();
-        vec.as_mut_slice().fill_with(|| 2);
+        vec.as_mut_slice().fill(2);
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 2000);
     }
 
@@ -969,7 +1045,7 @@ mod tests {
         assert_eq!(DROPS.get(), 0);
 
         let s = Struct { i: 0 };
-        for _ in 1..4 {
+        for _ in 1..=3 {
             vec.push(s.clone()).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
@@ -986,7 +1062,7 @@ mod tests {
         assert_eq!(DROPS.get(), 0);
 
         let s = Struct { i: 0 };
-        for _ in 1..6 {
+        for _ in 1..=5 {
             vec.push(s.clone()).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
@@ -1023,7 +1099,7 @@ mod tests {
             let mut vec = Vec::<Struct, 10>::new();
             assert_eq!(DROPS.get(), 0);
 
-            for _ in 1..4 {
+            for _ in 1..=3 {
                 vec.push(s.clone()).unwrap();
             }
             assert_eq!(DROPS.get(), 0);
