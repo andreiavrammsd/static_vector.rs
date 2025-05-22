@@ -22,7 +22,6 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 
 ## Requirements
 - `CAPACITY` > 0, otherwise [`Vec::new()`] panics 
-- `T: Clone` for insertion: [`Vec::push()`]
 - `T: Default` only if [`Vec::set_len()`] is used
 
 ## Complexity
@@ -49,16 +48,16 @@ use static_vector::Vec;
 
 let mut vec = Vec::<i32, 3>::new();
 
-vec.push(&4).unwrap();
-vec.push(&5).unwrap();
-vec.push(&6).unwrap();
+vec.push(4).unwrap();
+vec.push(5).unwrap();
+vec.push(6).unwrap();
 assert_eq!(vec.len(), 3);
 assert_eq!(vec.first(), Some(&4));
 
 let sum_of_even_numbers = vec.iter().filter(|n| *n % 2 == 0).sum::<i32>();
 assert_eq!(sum_of_even_numbers, 10);
 
-vec.push(&2).unwrap_err();
+vec.push(2).unwrap_err();
 assert_eq!(vec.len(), 3);
 
 match vec.set_len(1) {
@@ -69,6 +68,8 @@ match vec.set_len(1) {
 vec.clear();
 assert!(vec.is_empty());
 ```
+
+See more examples in the documentation of [`Vec`].
 
 ## Development on Linux
 

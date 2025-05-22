@@ -8,7 +8,7 @@ fn main() {
     vec.is_full();
     vec.capacity();
     vec.len();
-    vec.push(&1);
+    vec.push(1);
     vec.set_len(1);
     vec.first();
     vec.first_mut();

@@ -20,12 +20,12 @@ impl fmt::Display for CapacityError {
 impl error::Error for CapacityError {}
 
 /// A stack-allocated vector with fixed capacity and dynamic length.
-pub struct Vec<T: Clone, const CAPACITY: usize> {
+pub struct Vec<T, const CAPACITY: usize> {
     data: [MaybeUninit<T>; CAPACITY],
     length: usize,
 }
 
-impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
+impl<T, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
     /// Creates an empty [`Vec`]. Equivalent to [`Vec::new()`].
     ///
     /// # Panics
@@ -37,7 +37,7 @@ impl<T: Clone, const CAPACITY: usize> Default for Vec<T, CAPACITY> {
     }
 }
 
-impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
+impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Creates a new empty [`Vec`] with maximum `CAPACITY` elements of type `T`.
     ///
     /// # Panics
@@ -143,7 +143,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
         self.len() == self.capacity()
     }
 
-    /// Adds a clone of the given `value` to the end of the vector.
+    /// Adds the given `value` to the end of the vector.
     ///
     /// # Errors
     ///
@@ -160,11 +160,11 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// }
     ///
     /// fn my_fn(vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
-    ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
-    ///     vec.push(&1).map_err(AppError::VectorCapacityError)?;
+    ///     vec.push(1).map_err(AppError::VectorCapacityError)?;
+    ///     vec.push(1).map_err(AppError::VectorCapacityError)?;
     ///
     ///     // third push will fail because vector capacity is 2
-    ///     vec.push(&3).map_err(AppError::VectorCapacityError)?;
+    ///     vec.push(3).map_err(AppError::VectorCapacityError)?;
     ///
     ///     // other operations that could return errors
     ///     Ok(())
@@ -186,12 +186,12 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```
     #[inline]
     #[doc(alias("add", "append", "insert"))]
-    pub fn push(&mut self, value: &T) -> Result<(), CapacityError> {
+    pub fn push(&mut self, value: T) -> Result<(), CapacityError> {
         if self.is_full() {
             return Err(CapacityError);
         }
 
-        self.data[self.length].write(value.clone());
+        self.data[self.length].write(value);
         self.length += 1;
 
         Ok(())
@@ -410,7 +410,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// let mut vec = Vec::<i32, 2>::new();
     ///     
-    /// if vec.push(&1).is_ok() {
+    /// if vec.push(1).is_ok() {
     ///     *vec.get_mut(0).unwrap() = 5;
     /// }
     /// ```
@@ -522,7 +522,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     }
 }
 
-impl<T: Clone, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
+impl<T, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
     fn drop(&mut self) {
         self.drop_range(0, self.length);
     }
@@ -563,7 +563,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
-impl<'a, T: 'a + Clone, const CAPACITY: usize> IntoIterator for &'a Vec<T, CAPACITY> {
+impl<'a, T: 'a, const CAPACITY: usize> IntoIterator for &'a Vec<T, CAPACITY> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
@@ -608,7 +608,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
 }
 
-impl<'a, T: 'a + Clone, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, CAPACITY> {
+impl<'a, T: 'a, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, CAPACITY> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
 
@@ -657,18 +657,18 @@ mod tests {
         vec.set_len(2).unwrap();
         assert_eq!(vec.capacity(), 3);
 
-        vec.push(&1).unwrap();
+        vec.push(1).unwrap();
         assert_eq!(vec.capacity(), 3);
     }
 
     #[test]
     fn push() {
         let mut vec = Vec::<i32, 2>::new();
-        assert!(vec.push(&1).is_ok());
-        assert!(vec.push(&2).is_ok());
+        assert!(vec.push(1).is_ok());
+        assert!(vec.push(2).is_ok());
 
-        assert!(matches!(vec.push(&3), Err(CapacityError)));
-        assert_eq!(format!("{}", vec.push(&3).unwrap_err()), "vector needs larger capacity");
+        assert!(matches!(vec.push(3), Err(CapacityError)));
+        assert_eq!(format!("{}", vec.push(3).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
 
         assert_eq!(vec.get(0).unwrap(), &1);
@@ -683,8 +683,8 @@ mod tests {
         assert!(vec.is_empty());
         assert!(!vec.is_full());
 
-        vec.push(&1).unwrap();
-        vec.push(&2).unwrap();
+        vec.push(1).unwrap();
+        vec.push(2).unwrap();
         assert_eq!(vec.len(), 2);
         assert!(!vec.is_empty());
         assert!(!vec.is_full());
@@ -715,13 +715,13 @@ mod tests {
         assert!(vec.last().is_none());
         assert!(vec.get(0).is_none());
 
-        vec.push(&1).unwrap();
+        vec.push(1).unwrap();
         assert_eq!(vec.first().unwrap(), &1);
         assert_eq!(vec.get(0).unwrap(), &1);
         assert_eq!(vec.last().unwrap(), &1);
 
-        vec.push(&2).unwrap();
-        vec.push(&3).unwrap();
+        vec.push(2).unwrap();
+        vec.push(3).unwrap();
         assert_eq!(vec.first().unwrap(), &1);
         assert_eq!(vec.last().unwrap(), &3);
         assert_eq!(vec.get(0).unwrap(), &1);
@@ -737,13 +737,13 @@ mod tests {
         assert!(vec.last_mut().is_none());
         assert!(vec.get_mut(0).is_none());
 
-        vec.push(&1).unwrap();
+        vec.push(1).unwrap();
         assert_eq!(vec.first_mut().unwrap(), &1);
         assert_eq!(vec.get_mut(0).unwrap(), &1);
         assert_eq!(vec.last_mut().unwrap(), &1);
 
-        vec.push(&2).unwrap();
-        vec.push(&3).unwrap();
+        vec.push(2).unwrap();
+        vec.push(3).unwrap();
         assert_eq!(vec.first_mut().unwrap(), &1);
         assert_eq!(vec.last_mut().unwrap(), &3);
         assert_eq!(vec.get_mut(0).unwrap(), &1);
@@ -767,13 +767,13 @@ mod tests {
         assert!(vec.pop().is_none());
 
         let s1 = Struct { i: 1 };
-        vec.push(&s1).unwrap();
+        vec.push(s1).unwrap();
 
         let s2 = Struct { i: 2 };
-        vec.push(&s2).unwrap();
+        vec.push(s2).unwrap();
 
         let s3 = Struct { i: 3 };
-        vec.push(&s3).unwrap();
+        vec.push(s3).unwrap();
 
         assert_eq!(vec.pop().unwrap().i, 3);
         assert_eq!(vec.len(), 2);
@@ -786,7 +786,7 @@ mod tests {
         assert_eq!(DROPS.get(), 3);
 
         assert_eq!(DEFAULTS.get(), 0);
-        assert_eq!(CLONES.get(), 3); // from the three pushes
+        assert_eq!(CLONES.get(), 0); // from the three pushes
     }
 
     fn not<F>(f: F) -> impl Fn(&Struct) -> bool
@@ -804,13 +804,13 @@ mod tests {
         assert!(vec.pop_if(is_even).is_none());
 
         let s1 = Struct { i: 1 };
-        vec.push(&s1).unwrap();
+        vec.push(s1).unwrap();
 
         let s2 = Struct { i: 2 };
-        vec.push(&s2).unwrap();
+        vec.push(s2).unwrap();
 
         let s3 = Struct { i: 3 };
-        vec.push(&s3).unwrap();
+        vec.push(s3).unwrap();
 
         assert!(vec.pop_if(is_even).is_none());
         assert_eq!(vec.len(), 3);
@@ -837,14 +837,14 @@ mod tests {
         assert_eq!(DROPS.get(), 3);
 
         assert_eq!(DEFAULTS.get(), 0);
-        assert_eq!(CLONES.get(), 3); // from the three pushes
+        assert_eq!(CLONES.get(), 0); // from the three pushes
     }
 
     #[test]
     fn iter() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap();
+            vec.push(i).unwrap();
         }
 
         let even_sum = vec.iter().filter(|v| *v % 2 == 0).sum::<i32>();
@@ -857,7 +857,7 @@ mod tests {
     fn into_iter() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap();
+            vec.push(i).unwrap();
         }
 
         let mut s = 0;
@@ -871,7 +871,7 @@ mod tests {
     fn iter_mut() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap();
+            vec.push(i).unwrap();
         }
 
         let even_sum = vec.iter_mut().filter(|v| **v % 2 == 0).map(|v| *v).sum::<i32>();
@@ -884,7 +884,7 @@ mod tests {
     fn into_iter_mut() {
         let mut vec = Vec::<i32, 10>::new();
         for i in 1..8 {
-            vec.push(&i).unwrap();
+            vec.push(i).unwrap();
         }
 
         let mut s = 0;
@@ -902,7 +902,7 @@ mod tests {
         assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 0);
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 0);
 
-        vec.push(&10).unwrap();
+        vec.push(10).unwrap();
         assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 10);
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 10);
 
@@ -920,7 +920,7 @@ mod tests {
     #[test]
     fn push_should_not_create_default_elements() {
         let mut vec = Vec::<Struct, 10>::new();
-        vec.push(&Struct { i: 0 }).unwrap();
+        vec.push(Struct { i: 0 }).unwrap();
         assert_eq!(DEFAULTS.get(), 0);
     }
 
@@ -952,15 +952,15 @@ mod tests {
     }
 
     #[test]
-    fn push_should_clone_element() {
+    fn push_should_not_clone_element() {
         let mut vec = Vec::<Struct, 10>::new();
 
-        vec.push(&Struct { i: 0 }).unwrap();
-        assert_eq!(CLONES.get(), 1);
+        vec.push(Struct { i: 0 }).unwrap();
+        assert_eq!(CLONES.get(), 0);
 
-        vec.push(&Struct { i: 0 }).unwrap();
-        vec.push(&Struct { i: 0 }).unwrap();
-        assert_eq!(CLONES.get(), 3);
+        vec.push(Struct { i: 0 }).unwrap();
+        vec.push(Struct { i: 0 }).unwrap();
+        assert_eq!(CLONES.get(), 0);
     }
 
     #[test]
@@ -970,12 +970,14 @@ mod tests {
 
         let s = Struct { i: 0 };
         for _ in 1..4 {
-            vec.push(&s).unwrap();
+            vec.push(s.clone()).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
 
         vec.clear();
         assert_eq!(DROPS.get(), 3);
+
+        assert_eq!(CLONES.get(), 3); // the three clones before push
     }
 
     #[test]
@@ -985,7 +987,7 @@ mod tests {
 
         let s = Struct { i: 0 };
         for _ in 1..6 {
-            vec.push(&s).unwrap();
+            vec.push(s.clone()).unwrap();
         }
         assert_eq!(DROPS.get(), 0);
 
@@ -1009,6 +1011,8 @@ mod tests {
         DROPS.set(0);
         vec.set_len(0).unwrap();
         assert_eq!(DROPS.get(), 2);
+
+        assert_eq!(CLONES.get(), 5); // the five clones before push
     }
 
     #[test]
@@ -1020,12 +1024,13 @@ mod tests {
             assert_eq!(DROPS.get(), 0);
 
             for _ in 1..4 {
-                vec.push(&s).unwrap();
+                vec.push(s.clone()).unwrap();
             }
             assert_eq!(DROPS.get(), 0);
         };
 
         assert_eq!(DROPS.get(), 3);
+        assert_eq!(CLONES.get(), 3); // the three clones before push
     }
 
     struct Struct {

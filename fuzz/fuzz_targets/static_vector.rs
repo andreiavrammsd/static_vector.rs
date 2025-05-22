@@ -21,7 +21,7 @@ fuzz_target!(|data: &[u8]| {
 
     for (i, &byte) in data.iter().enumerate() {
         let is_full_before_push = vec.is_full();
-        let result = vec.push(&byte);
+        let result = vec.push(byte);
         let is_full_after_push = vec.is_full();
 
         if first_byte.is_none() {
@@ -61,7 +61,7 @@ fuzz_target!(|data: &[u8]| {
 
     vec.clear();
     for &byte in data {
-        assert!(vec.push(&byte).is_ok());
+        assert!(vec.push(byte).is_ok());
         assert_eq!(vec.len(), 1);
         assert_eq!(vec.pop().unwrap(), byte);
         assert!(vec.is_empty());
@@ -69,7 +69,7 @@ fuzz_target!(|data: &[u8]| {
 
     vec.clear();
     for &byte in data {
-        assert!(vec.push(&byte).is_ok());
+        assert!(vec.push(byte).is_ok());
         assert_eq!(vec.len(), 1);
         assert_eq!(vec.pop_if(|_b| true).unwrap(), byte);
         assert!(vec.is_empty());

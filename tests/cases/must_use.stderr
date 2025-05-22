@@ -51,13 +51,13 @@ help: use `let _ = ...` to ignore the resulting value
 error: unused `Result` that must be used
   --> tests/cases/must_use.rs:11:5
    |
-11 |     vec.push(&1);
-   |     ^^^^^^^^^^^^
+11 |     vec.push(1);
+   |     ^^^^^^^^^^^
    |
    = note: this `Result` may be an `Err` variant, which should be handled
 help: use `let _ = ...` to ignore the resulting value
    |
-11 |     let _ = vec.push(&1);
+11 |     let _ = vec.push(1);
    |     +++++++
 
 error: unused `Result` that must be used
