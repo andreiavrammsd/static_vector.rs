@@ -44,7 +44,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// Panics if `CAPACITY == 0`. Zero-capacity vectors are not supported.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -64,7 +64,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns the maximum number of elements the vector can contain.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -85,7 +85,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns the number of elements the vector currently contains.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -106,7 +106,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns whether the vector has no elements.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -126,7 +126,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// Returns whether the vector is at maximum capacity.
     ///
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -149,7 +149,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// Returns [`CapacityError`] if the vector is already at full capacity.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::{CapacityError, Vec};
@@ -199,7 +199,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Removes all elements. Size will be zero.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -221,14 +221,14 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Requirements
     ///
-    /// - `T` must implement `Default` because new elements are created with `T::default()`
+    /// - `T` must implement [`Default`] because new elements are created with `T::default()`
     ///   when increasing the length.
     ///
     /// # Errors
     ///
     /// Returns [`CapacityError`] if `new_length` exceeds the vector's fixed capacity.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -283,7 +283,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a reference to the first element in the vector, or [`None`] if the vector is empty.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -308,7 +308,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a mutable reference to the first element in the vector, or [`None`] if the vector is empty.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -329,7 +329,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a reference to the last element in the vector, or [`None`] if the vector is empty.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -350,7 +350,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a mutable reference to the last element in the vector, or [`None`] if the vector is empty.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -371,7 +371,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a reference to the element at the specified `index`, or [`None`] if out of bounds.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -403,7 +403,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -469,7 +469,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a slice of the entire vector.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
@@ -488,7 +488,7 @@ impl<T: Clone, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns a mutable slice of the entire vector.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
     /// use static_vector::Vec;
