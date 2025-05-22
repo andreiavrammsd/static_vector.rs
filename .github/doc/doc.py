@@ -80,7 +80,6 @@ def generate(args):
     create_version_dirs(DEV_VERSION)
     generate_version(DEV_VERSION)
 
-
     for version in versions:
         create_version_dirs(version)
 
