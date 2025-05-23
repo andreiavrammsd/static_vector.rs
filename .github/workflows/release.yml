@@ -46,7 +46,7 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           branch: release/v${{ env.VERSION }}
-          signoff: true
+          sign-commits: true
           title: "Release v${{ env.VERSION }}"
           body: "This PR bumps the version to v${{ env.VERSION }}."
           base: master
