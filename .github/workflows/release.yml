@@ -8,7 +8,7 @@ on:
         required: true
         type: string
     branches:
-      - main
+      - master
 
 jobs:
   release:
