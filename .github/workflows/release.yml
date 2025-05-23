@@ -9,12 +9,19 @@ on:
         type: string
     branches:
       - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  prepare-release:
+    if: github.event_name == 'workflow_dispatch
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
@@ -22,29 +29,58 @@ jobs:
           ref: master
 
       - name: Set version
-        id: set_version
-        run: |
-          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+        run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
-      - name: Update version in Cargo.toml
+      - name: Update crate version
         run: |
           sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
 
-      - name: Commit and tag version bump
-        run: |
-          git config user.name "Andrei Avram"
-          git config user.email "6795248+andreiavrammsd@users.noreply.github.com"
-          git commit -am "Release v${VERSION}"
-          git tag "v${VERSION}"
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Release v${{ env.VERSION }}"
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          branch: release/v${{ env.VERSION }}
+          signoff: true
+          title: "Release v${{ env.VERSION }}"
+          body: "This PR bumps the version to v${{ env.VERSION }}."
+          base: master
 
-      - name: Push changes
+  tag-and-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Extract version from Cargo.toml
         run: |
-          git push origin master
-          git push origin "v${VERSION}"
+          VERSION=$(grep '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists. Skipping."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        if: steps.check_tag.outputs.skip == 'false'
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git tag v${VERSION}
+          git push origin v${VERSION}
 
       - name: Create GitHub release
+        if: steps.check_tag.outputs.skip == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           name: v${{ env.VERSION }}
-          generate_release_notes: false
+          body: TBD
