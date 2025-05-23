@@ -19,6 +19,7 @@ overflow-checks = true
 lto = false
 panic = "unwind"
 opt-level = 0
+incremental = true
 
 [profile.release]
 codegen-units = 1
@@ -29,7 +30,6 @@ panic = "abort"
 opt-level = "s"
 split-debuginfo = "packed"
 strip = "symbols"
-incremental = true
 
 [profile.bench]
 lto = "thin"
