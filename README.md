@@ -1,9 +1,10 @@
 # `static_vector`
 
-[![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/andreiavrammsd/static_vector.rs/workflows/CI/badge.svg)](https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/andreiavrammsd/static_vector.rs/graph/badge.svg?token=pCcpya0mZC)](https://codecov.io/gh/andreiavrammsd/static_vector.rs)
-[![documentation](https://img.shields.io/badge/Documentation-static_vector-4EC820.svg)](https://andreiavrammsd.github.io/static_vector.rs/)
+[![fuzz](https://github.com/andreiavrammsd/static_vector.rs/workflows/FUZZ/badge.svg)](https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/fuzz.yml)
+[![documentation](https://github.com/andreiavrammsd/static_vector.rs/workflows/DOC/badge.svg)](https://andreiavrammsd.github.io/static_vector.rs/)
+[![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A no-std, stack-allocated vector with fixed capacity and dynamic length: `static_vector::Vec::<T, CAPACITY>`.
 
