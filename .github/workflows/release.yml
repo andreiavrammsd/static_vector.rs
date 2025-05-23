@@ -32,8 +32,8 @@ jobs:
         run: echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
       - name: Update crate version
-        uses: dtolnay/rust-toolchain@stable
-        run: |
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
           sed -i "s/^version = \".*\"/version = \"${VERSION}\"/" Cargo.toml
           cargo check
 
