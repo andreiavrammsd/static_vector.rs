@@ -19,12 +19,20 @@ overflow-checks = true
 lto = false
 panic = "unwind"
 opt-level = 0
+incremental = true
 
 [profile.release]
+codegen-units = 1
 overflow-checks = true
-lto = "thin"
+debug = "full"
+lto = true
 panic = "abort"
-opt-level = "z"
+opt-level = "s"
+split-debuginfo = "packed"
+strip = "symbols"
+
+[profile.bench]
+lto = "thin"
 
 [lints.rust]
 unsafe_code = "allow"
