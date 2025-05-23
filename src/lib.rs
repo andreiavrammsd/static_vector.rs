@@ -2,7 +2,8 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use core::{error, fmt, mem::MaybeUninit, slice};
+use core::mem::MaybeUninit;
+use core::{error, fmt, slice};
 
 /// Error for when the vector is full or the requested operation would need more space than the capacity.
 ///
@@ -72,7 +73,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// let vec = Vec::<i32, 10>::new();
     /// const SOME_LIMIT: usize = 5;
-    ///     
+    ///
     /// if vec.len() < vec.capacity() - SOME_LIMIT {
     ///     // do something
     /// }
@@ -236,7 +237,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// #[derive(Debug)]
     /// enum AppError {
-    ///     MyFnError
+    ///     MyFnError,
     /// }
     ///
     /// fn my_fn(vec: &mut Vec<i32, 200>) -> Result<(), AppError> {
@@ -290,7 +291,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 20>::new();
-    ///     
+    ///
     /// match vec.first() {
     ///     Some(num) => {
     ///         let _ = num;
@@ -315,10 +316,10 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 20>::new();
-    ///     
+    ///
     /// if let Some(num) = vec.first_mut() {
-    ///    *num = 1;
-    ///    let _ = num;
+    ///     *num = 1;
+    ///     let _ = num;
     /// }
     /// ```
     #[must_use]
@@ -336,7 +337,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 30>::new();
-    ///     
+    ///
     /// if let Some(num) = vec.last() {
     ///     let _ = num;
     ///     // do something with the last element
@@ -359,8 +360,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// let mut vec = Vec::<i32, 20>::new();
     ///
     /// if let Some(num) = vec.last_mut() {
-    ///    *num = 1;
-    ///    let _ = num;
+    ///     *num = 1;
+    ///     let _ = num;
     /// }
     /// ```
     #[must_use]
@@ -378,7 +379,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 20>::new();
-    ///     
+    ///
     /// match vec.get(22) {
     ///     Some(num) => {
     ///         let _ = num;
@@ -410,7 +411,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 20>::new();
-    ///     
+    ///
     /// if vec.push(1).is_ok() {
     ///     *vec.get_mut(0).unwrap() = 5;
     /// }
@@ -524,7 +525,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// let mut vec = Vec::<i32, 20>::new();
     ///
     /// for num in vec.iter_mut() {
-    ///    *num *= 2;
+    ///     *num *= 2;
     /// }
     /// ```
     #[inline]
@@ -570,7 +571,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// use static_vector::Vec;
     ///
     /// let mut vec = Vec::<i32, 10>::new();
-    ///     
+    ///
     /// if vec.set_len(5).is_ok() {
     ///     vec.as_mut_slice().fill(1);
     /// } else {
