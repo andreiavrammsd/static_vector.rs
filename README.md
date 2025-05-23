@@ -73,4 +73,6 @@ See more examples in the documentation of [`Vec`].
 
 ## Development on Linux
 
-See [Makefile](https://github.com/andreiavrammsd/static_vector.rs/blob/master/Makefile).
+* Install [Rust](https://www.rust-lang.org/tools/install) (stable is used for main code, nightly is used only for code formatting and fuzz tests).
+* If using VS Code, see [setup](https://github.com/andreiavrammsd/static_vector.rs/tree/master/.vscode).
+* See [Makefile](https://github.com/andreiavrammsd/static_vector.rs/blob/master/Makefile).
