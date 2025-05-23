@@ -8,7 +8,7 @@ test:
 	cargo test
 
 fmt:
-	cargo fmt --all -- --check || (cargo fmt --all && exit 1)
+	cargo +nightly fmt --all -- --check || (cargo +nightly fmt --all && exit 1)
 
 lint:
 	cargo clippy --all-targets --all-features
