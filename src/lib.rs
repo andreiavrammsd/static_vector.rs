@@ -2,6 +2,9 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
+#[macro_use]
+mod macros;
+
 use core::mem::MaybeUninit;
 use core::{cmp, error, fmt, slice};
 
