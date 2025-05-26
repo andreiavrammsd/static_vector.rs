@@ -585,6 +585,62 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         unsafe { slice::from_raw_parts_mut(self.data[0].as_mut_ptr(), self.len()) }
     }
 
+    /// Inserts elements of given slice at the end of the vector.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CapacityError`] if adding elements of given slice would result in vector exceeding its capacity.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::{CapacityError, Vec};
+    ///
+    /// #[derive(Debug)]
+    /// enum AppError {
+    ///     VectorCapacityError(CapacityError),
+    /// }
+    ///
+    /// fn my_fn(src: &[i32], vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
+    ///     vec.extend_from_slice(src).map_err(AppError::VectorCapacityError)?;
+    ///
+    ///     // other operations that could return errors
+    ///     Ok(())
+    /// }
+    ///
+    /// fn main() -> Result<(), AppError> {
+    ///     let src = [1, 2, 3];
+    ///     let mut vec = Vec::<i32, 2>::new();
+    ///
+    ///     if let Err(err) = my_fn(&src, &mut vec) {
+    ///         match err {
+    ///             AppError::VectorCapacityError(_) => {
+    ///                 // handle case
+    ///             },
+    ///         }
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    #[inline]
+    pub fn extend_from_slice(&mut self, slice: &[T]) -> Result<(), CapacityError>
+    where
+        T: Clone,
+    {
+        if self.len() + slice.len() > CAPACITY {
+            return Err(CapacityError);
+        }
+
+        for (index, value) in slice.iter().enumerate() {
+            self.data[self.len() + index].write(value.clone());
+        }
+
+        self.length += slice.len();
+
+        Ok(())
+    }
+
     /// Drops all elements in given range. Needed when elements are considered to be going out of scope.
     /// E.g.: when the vector is going out of scope, when methods such as [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
@@ -986,6 +1042,95 @@ mod tests {
         vec.set_len(1000).unwrap();
         vec.as_mut_slice().fill(2);
         assert_eq!(vec.as_slice().iter().sum::<i32>(), 2000);
+    }
+
+    #[test]
+    fn extend_from_slice_with_empty_vector_and_empty_slice() {
+        let src = [];
+        let mut dst = Vec::<i32, 3>::new();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_ok());
+        assert!(dst.is_empty());
+    }
+
+    #[test]
+    fn extend_from_slice_with_empty_vector_and_non_empty_slice_within_capacity() {
+        let src = [1, 2];
+        let mut dst = Vec::<i32, 3>::new();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_ok());
+        assert_eq!(dst.len(), 2);
+        assert_eq!(dst.as_slice(), [1, 2]);
+    }
+
+    #[test]
+    fn extend_from_slice_with_non_empty_vector_and_empty_slice() {
+        let src = [];
+        let mut dst = Vec::<i32, 3>::new();
+        dst.push(1).unwrap();
+        dst.push(2).unwrap();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_ok());
+        assert_eq!(dst.len(), 2);
+        assert_eq!(dst.as_slice(), [1, 2]);
+    }
+
+    #[test]
+    fn extend_from_slice_with_non_empty_vector_and_slice_fits_exactly_into_capacity() {
+        let src = [3, 4, 5];
+        let mut dst = Vec::<i32, 5>::new();
+        dst.push(1).unwrap();
+        dst.push(2).unwrap();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_ok());
+        assert_eq!(dst.len(), 5);
+        assert!(dst.is_full());
+        assert_eq!(dst.as_slice(), [1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn extend_from_slice_with_non_empty_vector_and_slice_exceeds_capacity() {
+        let src = [3, 4, 5, 6];
+        let mut dst = Vec::<i32, 5>::new();
+        dst.push(1).unwrap();
+        dst.push(2).unwrap();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_err());
+        assert_eq!(dst.len(), 2);
+        assert_eq!(dst.as_slice(), [1, 2]);
+    }
+
+    #[test]
+    fn extend_from_slice_with_vector_full_and_non_empty_slice() {
+        let src = [3, 4, 5, 6];
+        let mut dst = Vec::<i32, 2>::new();
+        dst.push(1).unwrap();
+        dst.push(2).unwrap();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_err());
+        assert_eq!(dst.len(), 2);
+        assert!(dst.is_full());
+        assert_eq!(dst.as_slice(), [1, 2]);
+    }
+
+    #[test]
+    fn extend_from_slice_with_non_empty_vector_and_non_empty_slice() {
+        let src = [3];
+        let mut dst = Vec::<i32, 5>::new();
+        dst.push(1).unwrap();
+        dst.push(2).unwrap();
+        let result = dst.extend_from_slice(&src);
+
+        assert!(result.is_ok());
+        assert_eq!(dst.len(), 3);
+        assert!(!dst.is_full());
+        assert_eq!(dst.as_slice(), [1, 2, 3]);
     }
 
     #[test]
