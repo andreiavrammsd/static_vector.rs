@@ -648,11 +648,19 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// ```rust
     /// use static_vector::Vec;
     ///
-    /// let mut vec = vec![1, 2, 3];
-    /// let mut other = vec![4, 5, 6];
-    /// vec.append(&mut other);
-    /// assert_eq!(vec, [1, 2, 3, 4, 5, 6]);
-    /// assert_eq!(other, []);
+    /// let mut vec = Vec::<i32, 10>::new();
+    /// vec.push(1).unwrap();
+    /// vec.push(2).unwrap();
+    /// vec.push(3).unwrap();
+    ///
+    /// let mut other = Vec::<i32, 20>::new();
+    /// other.push(4).unwrap();
+    /// other.push(5).unwrap();
+    /// other.push(6).unwrap();
+    ///
+    /// vec.append(&mut other).unwrap();
+    /// assert_eq!(vec.as_slice(), [1, 2, 3, 4, 5, 6]);
+    /// assert_eq!(other.as_slice(), []);
     /// ```
     #[inline]
     pub fn append<const OTHER_CAPACITY: usize>(
