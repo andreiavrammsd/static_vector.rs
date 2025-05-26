@@ -190,13 +190,11 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[doc(alias("add", "append", "insert"))]
     pub fn push(&mut self, value: T) -> Result<(), CapacityError> {
         if self.is_full() {
-            return Err(CapacityError);
+            Err(CapacityError)
+        } else {
+            self.push_unchecked(value);
+            Ok(())
         }
-
-        self.data[self.length].write(value);
-        self.length += 1;
-
-        Ok(())
     }
 
     /// Removes all elements. Size will be zero.
@@ -272,14 +270,14 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         }
 
         if new_length > self.length {
-            for i in self.length..new_length {
-                self.data[i].write(T::default());
+            while self.length < new_length {
+                self.push_unchecked(T::default());
             }
         } else {
             self.drop_range(new_length, self.length);
+            self.length = new_length;
         }
 
-        self.length = new_length;
         Ok(())
     }
 
@@ -632,13 +630,19 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
             return Err(CapacityError);
         }
 
-        for (index, value) in slice.iter().enumerate() {
-            self.data[self.len() + index].write(value.clone());
+        for value in slice {
+            self.push_unchecked(value.clone());
         }
 
-        self.length += slice.len();
-
         Ok(())
+    }
+
+    /// Adds the given `value` to the end of the vector without checking bounds.
+    /// For internal and controlled use only.
+    fn push_unchecked(&mut self, value: T) {
+        debug_assert!(!self.is_full(), "cannot push to full vector");
+        self.data[self.length].write(value);
+        self.length += 1;
     }
 
     /// Drops all elements in given range. Needed when elements are considered to be going out of scope.
@@ -664,10 +668,9 @@ impl<T, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
 impl<T: Clone, const CAPACITY: usize> Clone for Vec<T, CAPACITY> {
     fn clone(&self) -> Self {
         let mut vec = Self::new();
-        for (index, value) in self.iter().enumerate() {
-            vec.data[index].write(value.clone());
+        for value in self {
+            vec.push_unchecked(value.clone());
         }
-        vec.length = self.length;
         vec
     }
 }
