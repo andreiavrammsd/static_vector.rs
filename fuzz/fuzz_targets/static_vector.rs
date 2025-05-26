@@ -44,6 +44,7 @@ fuzz_target!(|data: &[u8]| {
 
             if is_full_after_push {
                 assert!(vec.is_full());
+                assert!(vec.extend_from_slice(&[0]).is_err());
             } else {
                 assert!(!vec.is_full());
             }
@@ -53,6 +54,13 @@ fuzz_target!(|data: &[u8]| {
             assert_eq!(vec.get_mut(i).unwrap(), &byte);
 
             prev_byte = Some(byte);
+
+            if vec.len() + 1 > vec.capacity() {
+                assert!(vec.extend_from_slice(&[0]).is_err());
+            } else {
+                assert!(vec.extend_from_slice(&[0]).is_ok());
+                vec.pop().unwrap();
+            }
         }
     }
 
