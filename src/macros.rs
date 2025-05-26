@@ -5,6 +5,10 @@
 /// - `vec![T; CAPACITY]`: Creates a new empty `Vec<T, CAPACITY>` with maximum `CAPACITY` elements of type `T`.
 /// - `vec![x, y, z]`: Creates a `Vec` initialized with the given values. The capacity is inferred from the number of elements.
 ///
+/// # Panics
+///
+/// Panics if `CAPACITY == 0`. Zero-capacity vectors are not supported.
+///
 /// # Examples
 ///
 /// Create an empty vector with capacity:
@@ -44,6 +48,12 @@ mod tests {
         let vec = vec![i32; 10];
         assert_eq!(vec.capacity(), 10);
         assert!(vec.is_empty());
+    }
+
+    #[test]
+    #[should_panic(expected = "CAPACITY must be greater than 0")]
+    fn vec_with_type_and_capacity_zero() {
+        let _ = vec![i32; 0];
     }
 
     #[test]
