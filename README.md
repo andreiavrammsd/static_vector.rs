@@ -34,6 +34,7 @@ All operations are O(1) except:
 | `clear`               | O(current length)                | O(1)                            |
 | `set_len`             | O(new length - current length)   | O(new length - current length)  |
 | `extend_from_slice`   | O(slice length)                  | O(slice length)                 |
+| `append`              | O(other vector length)           | O(other vector length)          |
 
 ## Add to project
 

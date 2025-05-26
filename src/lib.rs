@@ -637,6 +637,45 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         Ok(())
     }
 
+    /// Moves elements of `other` vector at the end of the current vector. `other` will be empty.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CapacityError`] if adding elements from `other` would result in current vector exceeding its capacity.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::Vec;
+    ///
+    /// let mut vec = Vec::<i32, 10>::new();
+    /// vec.push(1).unwrap();
+    /// vec.push(2).unwrap();
+    /// vec.push(3).unwrap();
+    ///
+    /// let mut other = Vec::<i32, 20>::new();
+    /// other.push(4).unwrap();
+    /// other.push(5).unwrap();
+    /// other.push(6).unwrap();
+    ///
+    /// vec.append(&mut other).unwrap();
+    /// assert_eq!(vec.as_slice(), [1, 2, 3, 4, 5, 6]);
+    /// assert_eq!(other.as_slice(), []);
+    /// ```
+    #[inline]
+    pub fn append<const OTHER_CAPACITY: usize>(
+        &mut self,
+        other: &mut Vec<T, OTHER_CAPACITY>,
+    ) -> Result<(), CapacityError>
+    where
+        T: Clone,
+    {
+        self.extend_from_slice(other.as_slice())?;
+        other.clear();
+
+        Ok(())
+    }
+
     /// Adds the given `value` to the end of the vector without checking bounds.
     /// For internal and controlled use only.
     fn push_unchecked(&mut self, value: T) {
@@ -1395,6 +1434,44 @@ mod tests {
         assert_eq!(dst.len(), 3);
         assert!(!dst.is_full());
         assert_eq!(dst.as_slice(), [1, 2, 3]);
+    }
+
+    #[test]
+    fn append_with_enough_room() {
+        let mut vec = Vec::<i32, 5>::new();
+        vec.push(1).unwrap();
+        vec.push(2).unwrap();
+
+        let mut other = Vec::<i32, 20>::new();
+        other.push(3).unwrap();
+        other.push(4).unwrap();
+
+        let result = vec.append(&mut other);
+
+        assert!(result.is_ok());
+        assert_eq!(vec.len(), 4);
+        assert_eq!(vec.as_slice(), [1, 2, 3, 4]);
+        assert!(other.is_empty());
+        assert_eq!(other.as_slice(), []);
+    }
+
+    #[test]
+    fn append_with_not_enough_room() {
+        let mut vec = Vec::<i32, 2>::new();
+        vec.push(1).unwrap();
+        vec.push(2).unwrap();
+
+        let mut other = Vec::<i32, 20>::new();
+        other.push(3).unwrap();
+        other.push(4).unwrap();
+
+        let result = vec.append(&mut other);
+
+        assert!(result.is_err());
+        assert_eq!(vec.len(), 2);
+        assert_eq!(vec.as_slice(), [1, 2]);
+        assert_eq!(other.len(), 2);
+        assert_eq!(other.as_slice(), [3, 4]);
     }
 
     #[test]
