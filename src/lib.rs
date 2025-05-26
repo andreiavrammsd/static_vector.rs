@@ -1533,6 +1533,10 @@ mod tests {
         b.clear();
         b.extend_from_slice(&[9, 9]).unwrap();
         assert!(a < b);
+
+        b.clear();
+        b.extend_from_slice(&[1, 2]).unwrap();
+        assert!(a > b);
     }
 
     #[test]
