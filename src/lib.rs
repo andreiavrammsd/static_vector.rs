@@ -3,7 +3,7 @@
 #![doc = include_str!("../README.md")]
 
 use core::mem::MaybeUninit;
-use core::{error, fmt, slice};
+use core::{cmp, error, fmt, slice};
 
 /// Error for when the vector is full or the requested operation would need more space than the capacity.
 ///
@@ -20,6 +20,7 @@ impl fmt::Display for CapacityError {
 
 impl error::Error for CapacityError {}
 
+#[derive(Debug)]
 /// A stack-allocated vector with fixed capacity and dynamic length.
 pub struct Vec<T, const CAPACITY: usize> {
     data: [MaybeUninit<T>; CAPACITY],
@@ -711,6 +712,22 @@ impl<T: Clone, const CAPACITY: usize> Clone for Vec<T, CAPACITY> {
             vec.push_unchecked(value.clone());
         }
         vec
+    }
+}
+
+impl<T: PartialEq, const CAPACITY: usize, const OTHER_CAPACITY: usize>
+    PartialEq<Vec<T, OTHER_CAPACITY>> for Vec<T, CAPACITY>
+{
+    fn eq(&self, other: &Vec<T, OTHER_CAPACITY>) -> bool {
+        self.len() == other.len() && self.as_slice() == other.as_slice()
+    }
+}
+
+impl<T: PartialOrd, const CAPACITY: usize, const OTHER_CAPACITY: usize>
+    PartialOrd<Vec<T, OTHER_CAPACITY>> for Vec<T, CAPACITY>
+{
+    fn partial_cmp(&self, other: &Vec<T, OTHER_CAPACITY>) -> Option<cmp::Ordering> {
+        self.as_slice().partial_cmp(other.as_slice())
     }
 }
 
@@ -1483,6 +1500,43 @@ mod tests {
         let new = vec.clone();
         assert_eq!(new.len(), 3);
         assert_eq!(new.as_slice(), elements);
+    }
+
+    #[test]
+    fn eq() {
+        let mut a = Vec::<i32, 5>::new();
+        a.extend_from_slice(&[1, 2, 3]).unwrap();
+
+        let mut b = Vec::<i32, 10>::new();
+        assert_ne!(a, b);
+
+        b.extend_from_slice(&[1, 2, 3]).unwrap();
+        assert_eq!(a, b);
+
+        b.clear();
+        b.extend_from_slice(&[9, 9, 9]).unwrap();
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn cmp() {
+        let mut a = Vec::<i32, 5>::new();
+        a.extend_from_slice(&[1, 2, 3]).unwrap();
+
+        let mut b = Vec::<i32, 10>::new();
+        assert!(a >= b);
+
+        b.extend_from_slice(&[1, 2, 3]).unwrap();
+        assert!(a >= b);
+        assert!(a <= b);
+
+        b.clear();
+        b.extend_from_slice(&[9, 9]).unwrap();
+        assert!(a < b);
+
+        b.clear();
+        b.extend_from_slice(&[1, 2]).unwrap();
+        assert!(a > b);
     }
 
     #[test]
