@@ -60,7 +60,7 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     pub const fn new() -> Self {
         assert!(CAPACITY > 0, "CAPACITY must be greater than 0");
 
-        // SAFETY: The elements in the array are not accessed before beign initialized.
+        // SAFETY: The elements in the array are not accessed before being initialized.
         let data = unsafe { MaybeUninit::<[MaybeUninit<T>; CAPACITY]>::uninit().assume_init() };
         Self { data, length: 0 }
     }
