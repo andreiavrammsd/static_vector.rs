@@ -39,7 +39,7 @@ def copy_existing_versions(gh_pages: Path, docs: Path):
 def generate_docs(build: Path, docs: Path, git_ref: str, redirect_template: Path):
     """Generate documentation for the given Git reference."""
     print(f"Generating docs for {git_ref}...")
-    run_cmd(f"git checkout {git_ref}")
+    run_cmd(f"git checkout {git_ref} --")
     run_cmd(f"cargo doc --no-deps --target-dir={build}")
 
     (docs / git_ref).mkdir(parents=True, exist_ok=True)
