@@ -1154,6 +1154,7 @@ mod tests {
         vec.extend_from_slice(&elements).unwrap();
 
         let new = vec.clone();
+        assert_eq!(new.len(), 3);
         assert_eq!(new.as_slice(), elements);
     }
 
