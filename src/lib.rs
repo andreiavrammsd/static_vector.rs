@@ -896,20 +896,25 @@ mod tests {
     #[test]
     fn push_should_not_create_default_elements() {
         let mut vec = Vec::<Struct, 10>::new();
+
         vec.push(Struct { i: 0 }).unwrap();
+
         assert_eq!(DEFAULTS.get(), 0);
+        assert_eq!(vec.as_slice(), &[Struct { i: 0 }]);
     }
 
     #[test]
     fn push_should_not_clone_element() {
         let mut vec = Vec::<Struct, 10>::new();
 
-        vec.push(Struct { i: 0 }).unwrap();
+        vec.push(Struct { i: 1 }).unwrap();
         assert_eq!(CLONES.get(), 0);
 
-        vec.push(Struct { i: 0 }).unwrap();
-        vec.push(Struct { i: 0 }).unwrap();
+        vec.push(Struct { i: 2 }).unwrap();
+        vec.push(Struct { i: 3 }).unwrap();
         assert_eq!(CLONES.get(), 0);
+
+        assert_eq!(vec.as_slice(), &[Struct { i: 1 }, Struct { i: 2 }, Struct { i: 3 }]);
     }
 
     #[test]
