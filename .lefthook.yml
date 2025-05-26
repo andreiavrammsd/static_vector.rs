@@ -1,4 +1,4 @@
 pre-commit:
   commands:
     quality:
-      run: make
+      run: make deny-commit-on-master && make
