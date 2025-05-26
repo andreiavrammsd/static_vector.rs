@@ -661,6 +661,17 @@ impl<T, const CAPACITY: usize> Drop for Vec<T, CAPACITY> {
     }
 }
 
+impl<T: Clone, const CAPACITY: usize> Clone for Vec<T, CAPACITY> {
+    fn clone(&self) -> Self {
+        let mut vec = Self::new();
+        for (index, value) in self.iter().enumerate() {
+            vec.data[index].write(value.clone());
+        }
+        vec.length = self.length;
+        vec
+    }
+}
+
 /// Immutable iterator over a [`Vec`].
 ///
 /// Created by calling [`Vec::iter()`].
@@ -1131,6 +1142,17 @@ mod tests {
         assert_eq!(dst.len(), 3);
         assert!(!dst.is_full());
         assert_eq!(dst.as_slice(), [1, 2, 3]);
+    }
+
+    #[test]
+    fn clone() {
+        let mut vec = Vec::<i32, 5>::new();
+        let elements = [1, 2, 3];
+        vec.extend_from_slice(&elements).unwrap();
+
+        let new = vec.clone();
+
+        assert_eq!(new.as_slice(), elements);
     }
 
     #[test]

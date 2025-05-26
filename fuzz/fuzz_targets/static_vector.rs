@@ -20,6 +20,8 @@ fuzz_target!(|data: &[u8]| {
     let mut prev_byte = None;
 
     for (i, &byte) in data.iter().enumerate() {
+        assert_eq!(vec.as_slice(), vec.clone().as_slice());
+
         let is_full_before_push = vec.is_full();
         let result = vec.push(byte);
         let is_full_after_push = vec.is_full();
