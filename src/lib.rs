@@ -779,11 +779,13 @@ mod tests {
 
     #[test]
     fn new() {
-        let vec = Vec::<Struct, 10>::new();
+        let mut vec = Vec::<Struct, 10>::new();
         assert!(vec.is_empty());
         assert!(!vec.is_full());
         assert_eq!(vec.len(), 0);
         assert_eq!(vec.capacity(), 10);
+        assert_eq!(vec.as_slice(), []);
+        assert_eq!(vec.as_mut_slice(), []);
         assert_eq!(DEFAULTS.get(), 0);
     }
 
@@ -795,11 +797,13 @@ mod tests {
 
     #[test]
     fn default() {
-        let vec = Vec::<Struct, 10>::default();
+        let mut vec = Vec::<Struct, 10>::default();
         assert!(vec.is_empty());
         assert!(!vec.is_full());
         assert_eq!(vec.len(), 0);
         assert_eq!(vec.capacity(), 10);
+        assert_eq!(vec.as_slice(), []);
+        assert_eq!(vec.as_mut_slice(), []);
         assert_eq!(DEFAULTS.get(), 0);
     }
 
@@ -812,7 +816,6 @@ mod tests {
     #[test]
     fn capacity() {
         let mut vec = Vec::<i32, 3>::new();
-
         assert_eq!(vec.capacity(), 3);
 
         vec.set_len(2).unwrap();
@@ -820,12 +823,14 @@ mod tests {
 
         vec.push(1).unwrap();
         assert_eq!(vec.capacity(), 3);
+
+        vec.clear();
+        assert_eq!(vec.capacity(), 3);
     }
 
     #[test]
     fn len() {
         let mut vec = Vec::<i32, 3>::new();
-
         assert_eq!(vec.len(), 0);
 
         vec.set_len(2).unwrap();
@@ -841,7 +846,6 @@ mod tests {
     #[test]
     fn is_empty() {
         let mut vec = Vec::<i32, 3>::new();
-
         assert!(vec.is_empty());
 
         vec.push(1).unwrap();
@@ -857,7 +861,6 @@ mod tests {
     #[test]
     fn is_full() {
         let mut vec = Vec::<i32, 3>::new();
-
         assert!(!vec.is_full());
 
         vec.push(1).unwrap();
@@ -868,6 +871,11 @@ mod tests {
 
         vec.clear();
         assert!(!vec.is_full());
+
+        vec.push(1).unwrap();
+        vec.push(1).unwrap();
+        vec.push(1).unwrap();
+        assert!(vec.is_full());
     }
 
     #[test]
@@ -913,6 +921,7 @@ mod tests {
         assert_eq!(vec.capacity(), 3);
         assert!(!vec.is_empty());
         assert!(vec.is_full());
+        assert_eq!(vec.as_slice(), &[1, 2, 3]);
 
         vec.clear();
 
@@ -920,6 +929,7 @@ mod tests {
         assert_eq!(vec.capacity(), 3);
         assert!(vec.is_empty());
         assert!(!vec.is_full());
+        assert_eq!(vec.as_slice(), &[]);
     }
 
     #[test]
@@ -944,12 +954,14 @@ mod tests {
     fn set_len() {
         let mut vec = Vec::<i32, 3>::new();
 
+        // New length less than capacity
         assert!(vec.set_len(1).is_ok());
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
         assert!(!vec.is_full());
         assert_eq!(vec.as_slice(), [0]);
 
+        // New length larger than capacity
         assert!(matches!(vec.set_len(100), Err(CapacityError)));
         assert_eq!(format!("{}", vec.set_len(100).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
@@ -958,6 +970,7 @@ mod tests {
         assert!(!vec.is_full());
         assert_eq!(vec.as_slice(), [0]);
 
+        // New length equal to capacity
         vec.clear();
         vec.set_len(vec.capacity()).unwrap();
         assert_eq!(vec.len(), 3);
@@ -965,6 +978,7 @@ mod tests {
         assert!(vec.is_full());
         assert_eq!(vec.as_slice(), [0, 0, 0]);
 
+        // New length zero
         assert!(vec.set_len(0).is_ok());
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
@@ -1045,7 +1059,7 @@ mod tests {
 
         vec.push(2).unwrap();
         vec.push(3).unwrap();
-        assert_eq!(vec.first().unwrap(), &1);
+        assert_eq!(vec.first(), Some(&1));
     }
 
     #[test]
@@ -1061,6 +1075,7 @@ mod tests {
         assert_eq!(vec.first_mut().unwrap(), &1);
 
         *vec.first_mut().unwrap() = 4;
+        assert_eq!(vec.first_mut(), Some(&mut 4));
         assert_eq!(vec.as_slice(), [4, 2, 3]);
     }
 
@@ -1098,6 +1113,7 @@ mod tests {
 
         vec.set_len(1).unwrap();
         assert_eq!(vec.last_mut(), Some(&mut 1));
+        assert_eq!(vec.as_slice(), [1]);
     }
 
     #[test]
@@ -1405,6 +1421,7 @@ mod tests {
         assert_eq!(CLONES.get(), 3); // the three clones before push
     }
 
+    #[derive(Debug)]
     struct Struct {
         i: i32,
     }
@@ -1432,6 +1449,12 @@ mod tests {
     impl Drop for Struct {
         fn drop(&mut self) {
             DROPS.set(DROPS.get() + 1);
+        }
+    }
+
+    impl PartialEq for Struct {
+        fn eq(&self, other: &Self) -> bool {
+            self.i == other.i
         }
     }
 }
