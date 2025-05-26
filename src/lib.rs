@@ -778,15 +778,29 @@ mod tests {
     fn assert_is_core_error<T: Error>() {}
 
     #[test]
-    fn construct() {
-        assert!(Vec::<i32, 3>::new().is_empty());
-        assert!(Vec::<i32, 3>::default().is_empty());
+    fn new() {
+        let vec = Vec::<Struct, 10>::new();
+        assert!(vec.is_empty());
+        assert!(!vec.is_full());
+        assert_eq!(vec.len(), 0);
+        assert_eq!(vec.capacity(), 10);
+        assert_eq!(DEFAULTS.get(), 0);
     }
 
     #[test]
     #[should_panic(expected = "CAPACITY must be greater than 0")]
     fn new_with_capacity_zero() {
         let _ = Vec::<i32, 0>::new();
+    }
+
+    #[test]
+    fn default() {
+        let vec = Vec::<Struct, 10>::default();
+        assert!(vec.is_empty());
+        assert!(!vec.is_full());
+        assert_eq!(vec.len(), 0);
+        assert_eq!(vec.capacity(), 10);
+        assert_eq!(DEFAULTS.get(), 0);
     }
 
     #[test]
@@ -809,6 +823,54 @@ mod tests {
     }
 
     #[test]
+    fn len() {
+        let mut vec = Vec::<i32, 3>::new();
+
+        assert_eq!(vec.len(), 0);
+
+        vec.set_len(2).unwrap();
+        assert_eq!(vec.len(), 2);
+
+        vec.push(1).unwrap();
+        assert_eq!(vec.len(), 3);
+
+        vec.clear();
+        assert_eq!(vec.len(), 0);
+    }
+
+    #[test]
+    fn is_empty() {
+        let mut vec = Vec::<i32, 3>::new();
+
+        assert!(vec.is_empty());
+
+        vec.push(1).unwrap();
+        assert!(!vec.is_empty());
+
+        vec.set_len(2).unwrap();
+        assert!(!vec.is_empty());
+
+        vec.clear();
+        assert!(vec.is_empty());
+    }
+
+    #[test]
+    fn is_full() {
+        let mut vec = Vec::<i32, 3>::new();
+
+        assert!(!vec.is_full());
+
+        vec.push(1).unwrap();
+        assert!(!vec.is_full());
+
+        vec.set_len(3).unwrap();
+        assert!(vec.is_full());
+
+        vec.clear();
+        assert!(!vec.is_full());
+    }
+
+    #[test]
     fn push() {
         let mut vec = Vec::<i32, 2>::new();
         assert!(vec.push(1).is_ok());
@@ -818,94 +880,253 @@ mod tests {
         assert_eq!(format!("{}", vec.push(3).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
 
-        assert_eq!(vec.get(0).unwrap(), &1);
-        assert_eq!(vec.get(1).unwrap(), &2);
+        assert_eq!(vec.as_slice(), &[1, 2]);
         assert!(vec.get(2).is_none());
+        assert!(vec.get(99).is_none());
     }
 
     #[test]
-    fn size() {
+    fn push_should_not_create_default_elements() {
+        let mut vec = Vec::<Struct, 10>::new();
+        vec.push(Struct { i: 0 }).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn push_should_not_clone_element() {
+        let mut vec = Vec::<Struct, 10>::new();
+
+        vec.push(Struct { i: 0 }).unwrap();
+        assert_eq!(CLONES.get(), 0);
+
+        vec.push(Struct { i: 0 }).unwrap();
+        vec.push(Struct { i: 0 }).unwrap();
+        assert_eq!(CLONES.get(), 0);
+    }
+
+    #[test]
+    fn clear() {
         let mut vec = Vec::<i32, 3>::new();
+
+        vec.extend_from_slice(&[1, 2, 3]).unwrap();
+        assert_eq!(vec.len(), 3);
+        assert_eq!(vec.capacity(), 3);
+        assert!(!vec.is_empty());
+        assert!(vec.is_full());
+
+        vec.clear();
+
         assert_eq!(vec.len(), 0);
+        assert_eq!(vec.capacity(), 3);
         assert!(vec.is_empty());
         assert!(!vec.is_full());
+    }
 
-        vec.push(1).unwrap();
-        vec.push(2).unwrap();
-        assert_eq!(vec.len(), 2);
-        assert!(!vec.is_empty());
-        assert!(!vec.is_full());
+    #[test]
+    fn clear_should_drop_all_allocated_elements() {
+        let mut vec = Vec::<Struct, 10>::new();
+        assert_eq!(DROPS.get(), 0);
+
+        let s = Struct { i: 0 };
+        for _ in 1..=3 {
+            vec.push(s.clone()).unwrap();
+        }
+        assert_eq!(DROPS.get(), 0);
+
+        vec.clear();
+        assert_eq!(DROPS.get(), 3);
+
+        assert_eq!(CLONES.get(), 3); // the three clones before push
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn set_len() {
+        let mut vec = Vec::<i32, 3>::new();
 
         assert!(vec.set_len(1).is_ok());
         assert_eq!(vec.len(), 1);
         assert!(!vec.is_empty());
         assert!(!vec.is_full());
+        assert_eq!(vec.as_slice(), [0]);
 
         assert!(matches!(vec.set_len(100), Err(CapacityError)));
         assert_eq!(format!("{}", vec.set_len(100).unwrap_err()), "vector needs larger capacity");
         assert_is_core_error::<CapacityError>();
+        assert_eq!(vec.len(), 1);
+        assert!(!vec.is_empty());
         assert!(!vec.is_full());
+        assert_eq!(vec.as_slice(), [0]);
 
         vec.clear();
-        assert!(!vec.is_full());
+        vec.set_len(vec.capacity()).unwrap();
+        assert_eq!(vec.len(), 3);
+        assert!(!vec.is_empty());
+        assert!(vec.is_full());
+        assert_eq!(vec.as_slice(), [0, 0, 0]);
+
+        assert!(vec.set_len(0).is_ok());
         assert_eq!(vec.len(), 0);
         assert!(vec.is_empty());
-
-        vec.set_len(vec.capacity()).unwrap();
-        assert!(vec.is_full());
+        assert!(!vec.is_full());
+        assert_eq!(vec.as_slice(), []);
     }
 
     #[test]
-    fn get_immutable() {
+    fn set_len_should_create_default_elements() {
+        let mut vec = Vec::<Struct, 10>::new();
+
+        // Length zero, no defaults
+        vec.set_len(0).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Length error, no defaults
+        vec.set_len(99).unwrap_err();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Maximum length, create `CAPACITY` default values
+        vec.set_len(10).unwrap();
+        assert_eq!(DEFAULTS.get(), 10);
+
+        // Smaller length than current, no defaults
+        DEFAULTS.set(0);
+        vec.set_len(5).unwrap();
+        assert_eq!(DEFAULTS.get(), 0);
+
+        // Larger length than current, create `current length - new length` default values
+        DEFAULTS.set(0);
+        vec.set_len(8).unwrap();
+        assert_eq!(DEFAULTS.get(), 3);
+    }
+
+    #[test]
+    fn set_len_should_drop_all_allocated_elements() {
+        let mut vec = Vec::<Struct, 10>::new();
+        assert_eq!(DROPS.get(), 0);
+
+        let s = Struct { i: 0 };
+        for _ in 1..=5 {
+            vec.push(s.clone()).unwrap();
+        }
+        assert_eq!(DROPS.get(), 0);
+
+        // Same length, no drops
+        vec.set_len(5).unwrap();
+        assert_eq!(DROPS.get(), 0);
+
+        // Length error, no drop
+        vec.set_len(999).unwrap_err();
+        assert_eq!(DROPS.get(), 0);
+
+        // Length smaller, drop elements after
+        vec.set_len(2).unwrap();
+        assert_eq!(DROPS.get(), 3);
+
+        // Same length again, no change in number of drops
+        vec.set_len(2).unwrap();
+        assert_eq!(DROPS.get(), 3);
+
+        // Length zero, drop all
+        DROPS.set(0);
+        vec.set_len(0).unwrap();
+        assert_eq!(DROPS.get(), 2);
+
+        assert_eq!(CLONES.get(), 5); // the five clones before push
+        assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn first() {
         let mut vec = Vec::<i32, 4>::new();
         assert!(vec.first().is_none());
-        assert!(vec.last().is_none());
-        assert!(vec.get(0).is_none());
 
         vec.push(1).unwrap();
         assert_eq!(vec.first().unwrap(), &1);
-        assert_eq!(vec.get(0).unwrap(), &1);
+
+        vec.push(2).unwrap();
+        vec.push(3).unwrap();
+        assert_eq!(vec.first().unwrap(), &1);
+    }
+
+    #[test]
+    fn first_mut() {
+        let mut vec = Vec::<i32, 4>::new();
+        assert!(vec.first_mut().is_none());
+
+        vec.push(1).unwrap();
+        assert_eq!(vec.first_mut().unwrap(), &1);
+
+        vec.push(2).unwrap();
+        vec.push(3).unwrap();
+        assert_eq!(vec.first_mut().unwrap(), &1);
+
+        *vec.first_mut().unwrap() = 4;
+        assert_eq!(vec.as_slice(), [4, 2, 3]);
+    }
+
+    #[test]
+    fn last() {
+        let mut vec = Vec::<i32, 2>::new();
+        assert!(vec.last().is_none());
+
+        vec.push(1).unwrap();
         assert_eq!(vec.last().unwrap(), &1);
 
         vec.push(2).unwrap();
-        vec.push(3).unwrap();
-        assert_eq!(vec.first().unwrap(), &1);
-        assert_eq!(vec.last().unwrap(), &3);
-        assert_eq!(vec.get(0).unwrap(), &1);
-        assert_eq!(vec.get(1).unwrap(), &2);
-        assert_eq!(vec.get(2).unwrap(), &3);
-        assert!(vec.get(3).is_none());
+        assert_eq!(vec.last().unwrap(), &2);
+
+        vec.push(3).unwrap_err();
+        assert_eq!(vec.last(), Some(&2));
     }
 
     #[test]
-    fn get_mutable() {
-        let mut vec = Vec::<i32, 4>::new();
-        assert!(vec.first_mut().is_none());
+    fn last_mut() {
+        let mut vec = Vec::<i32, 2>::new();
         assert!(vec.last_mut().is_none());
-        assert!(vec.get_mut(0).is_none());
 
         vec.push(1).unwrap();
-        assert_eq!(vec.first_mut().unwrap(), &1);
-        assert_eq!(vec.get_mut(0).unwrap(), &1);
         assert_eq!(vec.last_mut().unwrap(), &1);
 
         vec.push(2).unwrap();
-        vec.push(3).unwrap();
-        assert_eq!(vec.first_mut().unwrap(), &1);
-        assert_eq!(vec.last_mut().unwrap(), &3);
-        assert_eq!(vec.get_mut(0).unwrap(), &1);
-        assert_eq!(vec.get_mut(1).unwrap(), &2);
-        assert_eq!(vec.get_mut(2).unwrap(), &3);
-        assert!(vec.get_mut(3).is_none());
+        assert_eq!(vec.last_mut().unwrap(), &2);
 
-        *vec.get_mut(0).unwrap() = 5;
-        assert_eq!(vec.get_mut(0).unwrap(), &5);
+        vec.push(3).unwrap_err();
+        assert_eq!(vec.last_mut().unwrap(), &2);
 
-        *vec.first_mut().unwrap() = 15;
-        assert_eq!(vec.first_mut().unwrap(), &15);
+        *vec.last_mut().unwrap() = 4;
+        assert_eq!(vec.as_slice(), [1, 4]);
 
-        *vec.last_mut().unwrap() = 25;
-        assert_eq!(vec.last_mut().unwrap(), &25);
+        vec.set_len(1).unwrap();
+        assert_eq!(vec.last_mut(), Some(&mut 1));
+    }
+
+    #[test]
+    fn get() {
+        let mut vec = Vec::<i32, 2>::new();
+        assert!(vec.get(0).is_none());
+
+        vec.push(1).unwrap();
+        assert_eq!(vec.get(0), Some(&1));
+
+        vec.push(2).unwrap();
+        assert_eq!(vec.get(1), Some(&2));
+
+        assert_eq!(vec.get(3), None);
+    }
+
+    #[test]
+    fn get_mut() {
+        let mut vec = Vec::<i32, 2>::new();
+        assert!(vec.get_mut(0).is_none());
+
+        vec.push(1).unwrap();
+        assert_eq!(vec.get_mut(0), Some(&mut 1));
+
+        vec.push(2).unwrap();
+        *vec.get_mut(1).unwrap() = 3;
+        assert_eq!(vec.get_mut(1), Some(&mut 3));
+
+        assert_eq!(vec.get_mut(3), None);
     }
 
     #[test]
@@ -1045,13 +1266,19 @@ mod tests {
     #[test]
     fn as_slice() {
         let mut vec = Vec::<i32, 1000>::new();
+        assert_eq!(vec.as_slice(), []);
 
-        assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 0);
-        assert_eq!(vec.as_slice().iter().sum::<i32>(), 0);
+        vec.extend_from_slice(&[1, 2, 3]).unwrap();
+        assert_eq!(vec.as_slice(), [1, 2, 3]);
+    }
 
-        vec.push(10).unwrap();
-        assert_eq!(vec.as_mut_slice().iter().sum::<i32>(), 10);
-        assert_eq!(vec.as_slice().iter().sum::<i32>(), 10);
+    #[test]
+    fn as_mut_slice() {
+        let mut vec = Vec::<i32, 1000>::new();
+        assert_eq!(vec.as_mut_slice(), []);
+
+        vec.extend_from_slice(&[1, 2, 3]).unwrap();
+        assert_eq!(vec.as_mut_slice(), [1, 2, 3]);
 
         vec.set_len(1000).unwrap();
         vec.as_mut_slice().fill(2);
@@ -1156,110 +1383,6 @@ mod tests {
         let new = vec.clone();
         assert_eq!(new.len(), 3);
         assert_eq!(new.as_slice(), elements);
-    }
-
-    #[test]
-    fn construct_should_not_create_default_elements() {
-        let _ = Vec::<Struct, 10>::new();
-        assert_eq!(DEFAULTS.get(), 0);
-    }
-
-    #[test]
-    fn push_should_not_create_default_elements() {
-        let mut vec = Vec::<Struct, 10>::new();
-        vec.push(Struct { i: 0 }).unwrap();
-        assert_eq!(DEFAULTS.get(), 0);
-    }
-
-    #[test]
-    fn set_len_should_create_default_elements() {
-        let mut vec = Vec::<Struct, 10>::new();
-
-        // Length zero, no defaults
-        vec.set_len(0).unwrap();
-        assert_eq!(DEFAULTS.get(), 0);
-
-        // Length error, no defaults
-        vec.set_len(99).unwrap_err();
-        assert_eq!(DEFAULTS.get(), 0);
-
-        // Maximum length, create `CAPACITY` default values
-        vec.set_len(10).unwrap();
-        assert_eq!(DEFAULTS.get(), 10);
-
-        // Smaller length than current, no defaults
-        DEFAULTS.set(0);
-        vec.set_len(5).unwrap();
-        assert_eq!(DEFAULTS.get(), 0);
-
-        // Larger length than current, create `current length - new length` default values
-        DEFAULTS.set(0);
-        vec.set_len(8).unwrap();
-        assert_eq!(DEFAULTS.get(), 3);
-    }
-
-    #[test]
-    fn push_should_not_clone_element() {
-        let mut vec = Vec::<Struct, 10>::new();
-
-        vec.push(Struct { i: 0 }).unwrap();
-        assert_eq!(CLONES.get(), 0);
-
-        vec.push(Struct { i: 0 }).unwrap();
-        vec.push(Struct { i: 0 }).unwrap();
-        assert_eq!(CLONES.get(), 0);
-    }
-
-    #[test]
-    fn clear_should_drop_all_allocated_elements() {
-        let mut vec = Vec::<Struct, 10>::new();
-        assert_eq!(DROPS.get(), 0);
-
-        let s = Struct { i: 0 };
-        for _ in 1..=3 {
-            vec.push(s.clone()).unwrap();
-        }
-        assert_eq!(DROPS.get(), 0);
-
-        vec.clear();
-        assert_eq!(DROPS.get(), 3);
-
-        assert_eq!(CLONES.get(), 3); // the three clones before push
-    }
-
-    #[test]
-    fn set_len_should_drop_all_allocated_elements() {
-        let mut vec = Vec::<Struct, 10>::new();
-        assert_eq!(DROPS.get(), 0);
-
-        let s = Struct { i: 0 };
-        for _ in 1..=5 {
-            vec.push(s.clone()).unwrap();
-        }
-        assert_eq!(DROPS.get(), 0);
-
-        // Same length, no drops
-        vec.set_len(5).unwrap();
-        assert_eq!(DROPS.get(), 0);
-
-        // Length error, no drop
-        vec.set_len(999).unwrap_err();
-        assert_eq!(DROPS.get(), 0);
-
-        // Length smaller, drop elements after
-        vec.set_len(2).unwrap();
-        assert_eq!(DROPS.get(), 3);
-
-        // Same length again, no change in number of drops
-        vec.set_len(2).unwrap();
-        assert_eq!(DROPS.get(), 3);
-
-        // Length zero, drop all
-        DROPS.set(0);
-        vec.set_len(0).unwrap();
-        assert_eq!(DROPS.get(), 2);
-
-        assert_eq!(CLONES.get(), 5); // the five clones before push
     }
 
     #[test]
