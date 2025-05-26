@@ -585,15 +585,44 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         unsafe { slice::from_raw_parts_mut(self.data[0].as_mut_ptr(), self.len()) }
     }
 
-    /// Adds elements of given slice to the vector.
-    ///
-    /// # Arguments
-    ///
-    /// - `slice` - The source of elements to add.
+    /// Inserts elements of given slice at the end of the vector.
     ///
     /// # Errors
     ///
     /// Returns [`CapacityError`] if adding elements of given slice would result in vector exceeding its capacity.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use static_vector::{CapacityError, Vec};
+    ///
+    /// #[derive(Debug)]
+    /// enum AppError {
+    ///     VectorCapacityError(CapacityError),
+    /// }
+    ///
+    /// fn my_fn(src: &[i32], vec: &mut Vec<i32, 2>) -> Result<(), AppError> {
+    ///     vec.extend_from_slice(src).map_err(AppError::VectorCapacityError)?;
+    ///
+    ///     // other operations that could return errors
+    ///     Ok(())
+    /// }
+    ///
+    /// fn main() -> Result<(), AppError> {
+    ///     let src = [1, 2, 3];
+    ///     let mut vec = Vec::<i32, 2>::new();
+    ///
+    ///     if let Err(err) = my_fn(&src, &mut vec) {
+    ///         match err {
+    ///             AppError::VectorCapacityError(_) => {
+    ///                 // handle case
+    ///             },
+    ///         }
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     #[inline]
     pub fn extend_from_slice(&mut self, slice: &[T]) -> Result<(), CapacityError>
     where
