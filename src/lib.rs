@@ -1111,6 +1111,7 @@ mod tests {
         vec.push(2).unwrap();
         assert_eq!(vec.get(1), Some(&2));
 
+        assert_eq!(vec.get(2), None);
         assert_eq!(vec.get(3), None);
     }
 
@@ -1126,6 +1127,7 @@ mod tests {
         *vec.get_mut(1).unwrap() = 3;
         assert_eq!(vec.get_mut(1), Some(&mut 3));
 
+        assert_eq!(vec.get_mut(2), None);
         assert_eq!(vec.get_mut(3), None);
     }
 
