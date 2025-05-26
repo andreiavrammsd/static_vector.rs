@@ -719,7 +719,7 @@ impl<T: PartialEq, const CAPACITY: usize, const OTHER_CAPACITY: usize>
     PartialEq<Vec<T, OTHER_CAPACITY>> for Vec<T, CAPACITY>
 {
     fn eq(&self, other: &Vec<T, OTHER_CAPACITY>) -> bool {
-        if self.len() == other.len() { self.as_slice() == other.as_slice() } else { false }
+        self.len() == other.len() && self.as_slice() == other.as_slice()
     }
 }
 
