@@ -49,8 +49,6 @@ macro_rules! vec {
     ($($value:expr),+ $(,)?) => {
         {
             let mut vec = $crate::Vec::<_, { [$($value),+].len() }>::new();
-            // It's safe to call expect because we are initializing the vector with a known number of elements
-            // (which is also the capacity).
             vec.extend_from_slice(&[$($value),+]).expect("length matches capacity");
             vec
         }
@@ -58,14 +56,7 @@ macro_rules! vec {
 
     ($capacity:literal; $($value:expr),+ $(,)?) => {
         {
-            assert!(
-                $capacity >= { [$($value),+].len() },
-                "too many elements ({}) for CAPACITY ({})", { [$($value),+].len() }, $capacity
-            );
-
             let mut vec = $crate::Vec::<_, $capacity>::new();
-            // It's safe to call expect because we are initializing the vector with a known number of elements
-            // (which is less than or equal to the capacity).
             vec.extend_from_slice(&[$($value),+]).expect("length is less than or equal to capacity");
             vec
         }
@@ -73,14 +64,7 @@ macro_rules! vec {
 
     ($type:ty; $capacity:literal; $length:literal) => {
         {
-            assert!(
-                $capacity >= $length,
-                "length ({}) is larger than CAPACITY ({})", $length, $capacity
-            );
-
             let mut vec = $crate::Vec::<$type, $capacity>::new();
-            // It's safe to call expect because we are initializing the vector with a known number of elements
-            // (which is less than or equal to the capacity).
             vec.set_len($length).expect("length is less than or equal to capacity");
             vec
         }
@@ -119,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "too many elements (3) for CAPACITY (2)")]
+    #[should_panic(expected = "length is less than or equal to capacity: CapacityError")]
     fn vec_with_more_elements_than_capacity() {
         let _ = vec![2; 1, 2, 3];
     }
@@ -141,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "length (30) is larger than CAPACITY (10)")]
+    #[should_panic(expected = "length is less than or equal to capacity: CapacityError")]
     fn vec_with_capacity_and_length_when_length_is_greater_than_capacity() {
         let _ = vec![i32; 10; 30];
     }
