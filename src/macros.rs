@@ -33,7 +33,7 @@
 /// let vec = vec![u16; 8; 5]; // Vector with capacity 8, length set to 5, initialized with zeros
 /// ```
 macro_rules! vec {
-    ($type:ty; $capacity:literal) => {
+    ($type:ty; $capacity:expr) => {
         $crate::Vec::<$type, $capacity>::new()
     };
 
@@ -45,7 +45,7 @@ macro_rules! vec {
         }
     };
 
-    ($capacity:literal; $($value:expr),+ $(,)?) => {
+    ($capacity:expr; $($value:expr),+ $(,)?) => {
         {
             let mut vec = $crate::Vec::<_, $capacity>::new();
             vec.extend_from_slice(&[$($value),+]).expect("length is less than or equal to capacity");
@@ -53,7 +53,7 @@ macro_rules! vec {
         }
     };
 
-    ($type:ty; $capacity:literal; $length:literal) => {
+    ($type:ty; $capacity:expr; $length:expr) => {
         {
             let mut vec = $crate::Vec::<$type, $capacity>::new();
             vec.set_len($length).expect("length is less than or equal to capacity");
@@ -65,8 +65,16 @@ macro_rules! vec {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn vec_with_type_and_capacity() {
+    fn vec_with_type_and_capacity_literal() {
         let vec = vec![i32; 10];
+        assert_eq!(vec.capacity(), 10);
+        assert!(vec.is_empty());
+    }
+
+    #[test]
+    fn vec_with_type_and_capacity_constant() {
+        const CAPACITY: usize = 10;
+        let vec = vec![i32; CAPACITY];
         assert_eq!(vec.capacity(), 10);
         assert!(vec.is_empty());
     }
@@ -94,8 +102,17 @@ mod tests {
     }
 
     #[test]
-    fn vec_with_capacity_and_elements() {
+    fn vec_with_capacity_literal_and_elements() {
         let vec = vec![10; 1, 2, 3];
+        assert_eq!(vec.capacity(), 10);
+        assert_eq!(vec.len(), 3);
+        assert_eq!(vec.as_slice(), &[1, 2, 3]);
+    }
+
+    #[test]
+    fn vec_with_capacity_constants_and_elements() {
+        const CAPACITY: usize = 10;
+        let vec = vec![CAPACITY; 1, 2, 3];
         assert_eq!(vec.capacity(), 10);
         assert_eq!(vec.len(), 3);
         assert_eq!(vec.as_slice(), &[1, 2, 3]);
@@ -108,8 +125,18 @@ mod tests {
     }
 
     #[test]
-    fn vec_with_capacity_and_length() {
+    fn vec_with_capacity_and_length_literals() {
         let vec = vec![i32; 10; 3];
+        assert_eq!(vec.capacity(), 10);
+        assert_eq!(vec.len(), 3);
+        assert_eq!(vec.as_slice(), &[0, 0, 0]);
+    }
+
+    #[test]
+    fn vec_with_capacity_and_length_constants() {
+        const CAPACITY: usize = 10;
+        const LENGTH: usize = 3;
+        let vec = vec![i32; CAPACITY; LENGTH];
         assert_eq!(vec.capacity(), 10);
         assert_eq!(vec.len(), 3);
         assert_eq!(vec.as_slice(), &[0, 0, 0]);
