@@ -1,8 +1,8 @@
 .SILENT:
-.PHONY: fuzz
+.PHONY: fuzz examples
 
 # VS Code: Ctrl+Shift+B
-all: test fmt lint build-doc
+all: test fmt lint build-doc examples
 
 test:
 	cargo test
@@ -36,6 +36,11 @@ build-doc:
 
 fuzz:
 	cargo +nightly fuzz run static_vector
+
+examples:
+	for ex in $$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[].targets[] | select(.kind[] == "example") | .name'); do \
+		cargo run --example $$ex; \
+	done
 
 dev:
 	echo Installing pre-commit hook...
