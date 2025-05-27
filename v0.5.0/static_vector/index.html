@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`static_vector`"><title>static_vector - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-916cea96.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="static_vector" data-themes="" data-resource-suffix="" data-rustdoc-version="1.87.0 (17067e9ac 2025-05-09)" data-channel="1.87.0" data-search-js="search-e7298875.js" data-settings-js="settings-d72f25bb.js" ><script src="../static.files/storage-82c7156e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-fb8c74a8.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../static_vector/index.html">static_<wbr>vector</a><span class="version">0.5.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#static_vector" title="`static_vector`"><code>static_vector</code></a><ul><li><a href="#features" title="Features">Features</a></li><li><a href="#requirements" title="Requirements">Requirements</a></li><li><a href="#complexity" title="Complexity">Complexity</a></li><li><a href="#add-to-project" title="Add to project">Add to project</a></li><li><a href="#example" title="Example">Example</a></li><li><a href="#development-on-linux" title="Development on Linux">Development on Linux</a></li></ul></li></ul><h3><a href="#macros">Crate Items</a></h3><ul class="block"><li><a href="#macros" title="Macros">Macros</a></li><li><a href="#structs" title="Structs">Structs</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>static_vector</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/static_vector/lib.rs.html#1-1599">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="static_vector"><a class="doc-anchor" href="#static_vector">§</a><code>static_vector</code></h2>
+<p><a href="https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/ci.yml"><img src="https://github.com/andreiavrammsd/static_vector.rs/workflows/CI/badge.svg" alt="build" /></a>
+<a href="https://codecov.io/gh/andreiavrammsd/static_vector.rs"><img src="https://codecov.io/gh/andreiavrammsd/static_vector.rs/graph/badge.svg?token=pCcpya0mZC" alt="codecov" /></a>
+<a href="https://github.com/andreiavrammsd/static_vector.rs/actions/workflows/fuzz.yml"><img src="https://github.com/andreiavrammsd/static_vector.rs/workflows/FUZZ/badge.svg" alt="fuzz" /></a>
+<a href="https://andreiavrammsd.github.io/static_vector.rs/"><img src="https://github.com/andreiavrammsd/static_vector.rs/workflows/DOC/badge.svg" alt="documentation" /></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="license" /></a></p>
+<p>A no-std, stack-allocated vector with fixed capacity and dynamic length: <code>static_vector::Vec::&lt;T, CAPACITY&gt;</code>.</p>
+<p><a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a> stores elements on the stack using a fixed-size array without heap allocations.</p>
+<p>Aims to be suitable for low-level projects and to have an API as safe and explicit as possible.
+The goal is to allocate only when needed. When first constructed, the vector will not allocate.</p>
+<blockquote>
+<p><strong>Note:</strong> It’s a learning project, so there are no guarantees.</p>
+</blockquote>
+<h3 id="features"><a class="doc-anchor" href="#features">§</a>Features</h3>
+<ul>
+<li>No heap allocation (<code>#![no_std]</code> compatible)</li>
+<li>Supports iteration, mutable access, clearing, resizing</li>
+<li>Compile-time enforced capacity</li>
+</ul>
+<h3 id="requirements"><a class="doc-anchor" href="#requirements">§</a>Requirements</h3>
+<ul>
+<li><code>CAPACITY</code> &gt; 0, otherwise <a href="struct.Vec.html#method.new" title="associated function static_vector::Vec::new"><code>Vec::new()</code></a> panics</li>
+<li><code>T: Default</code> only if <a href="struct.Vec.html#method.set_len" title="method static_vector::Vec::set_len"><code>Vec::set_len()</code></a> is used</li>
+</ul>
+<h3 id="complexity"><a class="doc-anchor" href="#complexity">§</a>Complexity</h3>
+<p>All operations are O(1) except:</p>
+<div><table><thead><tr><th>Method</th><th>Time Complexity</th><th>Space Complexity</th></tr></thead><tbody>
+<tr><td><code>clear</code></td><td>O(current length)</td><td>O(1)</td></tr>
+<tr><td><code>set_len</code></td><td>O(new length - current length)</td><td>O(new length - current length)</td></tr>
+<tr><td><code>extend_from_slice</code></td><td>O(slice length)</td><td>O(slice length)</td></tr>
+<tr><td><code>append</code></td><td>O(other vector length)</td><td>O(other vector length)</td></tr>
+</tbody></table>
+</div><h3 id="add-to-project"><a class="doc-anchor" href="#add-to-project">§</a>Add to project</h3><div class="example-wrap"><pre class="language-bash"><code>cargo add static_vector --git https://github.com/andreiavrammsd/static_vector.rs</code></pre></div>
+<p>This crate is not published on <a href="https://crates.io/">crates.io</a>.</p>
+<h3 id="example"><a class="doc-anchor" href="#example">§</a>Example</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>static_vector::Vec;
+
+<span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::&lt;i32, <span class="number">3</span>&gt;::new();
+
+vec.push(<span class="number">4</span>).unwrap();
+vec.push(<span class="number">5</span>).unwrap();
+vec.push(<span class="number">6</span>).unwrap();
+<span class="macro">assert_eq!</span>(vec.len(), <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(vec.first(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));
+
+<span class="kw">let </span>sum_of_even_numbers = vec.iter().filter(|n| <span class="kw-2">*</span>n % <span class="number">2 </span>== <span class="number">0</span>).sum::&lt;i32&gt;();
+<span class="macro">assert_eq!</span>(sum_of_even_numbers, <span class="number">10</span>);
+
+vec.push(<span class="number">2</span>).unwrap_err();
+<span class="macro">assert_eq!</span>(vec.len(), <span class="number">3</span>);
+
+<span class="kw">match </span>vec.set_len(<span class="number">1</span>) {
+    <span class="prelude-val">Ok</span>(()) =&gt; <span class="macro">assert_eq!</span>(vec.len(), <span class="number">1</span>),
+    <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">eprintln!</span>(<span class="string">"{:?}"</span>, err),
+}
+
+vec.clear();
+<span class="macro">assert!</span>(vec.is_empty());</code></pre></div>
+<p>See more examples in the documentation of <a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a>.</p>
+<h3 id="development-on-linux"><a class="doc-anchor" href="#development-on-linux">§</a>Development on Linux</h3>
+<ul>
+<li>Install <a href="https://www.rust-lang.org/tools/install">Rust</a> (stable is used for main code, nightly is used only for code formatting and fuzz tests).</li>
+<li>If using VS Code, see <a href="https://github.com/andreiavrammsd/static_vector.rs/tree/master/.vscode">setup</a>.</li>
+<li>See <a href="https://github.com/andreiavrammsd/static_vector.rs/blob/master/Makefile">Makefile</a>.</li>
+</ul>
+</div></details><h2 id="macros" class="section-header">Macros<a href="#macros" class="anchor">§</a></h2><dl class="item-table"><dt><a class="macro" href="macro.vec.html" title="macro static_vector::vec">vec</a></dt><dd>A macro for creating a static vector (<code>Vec</code>) with various initialization patterns.</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.CapacityError.html" title="struct static_vector::CapacityError">Capacity<wbr>Error</a></dt><dd>Error for when the vector is full or the requested operation would need more space than the capacity.</dd><dt><a class="struct" href="struct.Iter.html" title="struct static_vector::Iter">Iter</a></dt><dd>Immutable iterator over a <a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a>.</dd><dt><a class="struct" href="struct.IterMut.html" title="struct static_vector::IterMut">IterMut</a></dt><dd>Mutable iterator over a <a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a>.</dd><dt><a class="struct" href="struct.Vec.html" title="struct static_vector::Vec">Vec</a></dt><dd>A stack-allocated vector with fixed capacity and dynamic length.</dd></dl></section></div></main></body></html>

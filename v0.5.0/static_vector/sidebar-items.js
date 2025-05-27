@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["vec"],"struct":["CapacityError","Iter","IterMut","Vec"]};
