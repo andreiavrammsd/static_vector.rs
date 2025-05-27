@@ -33,18 +33,22 @@ The goal is to allocate only when needed. When first constructed, the vector wil
 </div><h3 id="add-to-project"><a class="doc-anchor" href="#add-to-project">§</a>Add to project</h3><div class="example-wrap"><pre class="language-bash"><code>cargo add static_vector --git https://github.com/andreiavrammsd/static_vector.rs</code></pre></div>
 <p>This crate is not published on <a href="https://crates.io/">crates.io</a>.</p>
 <h3 id="example"><a class="doc-anchor" href="#example">§</a>Example</h3>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>static_vector::Vec;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>static_vector::vec;
 
-<span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::&lt;i32, <span class="number">3</span>&gt;::new();
+<span class="comment">// Create a static vector with capacity 3, length 3, and elements 1, 2, 3.
+</span><span class="kw">let </span><span class="kw-2">mut </span>vec = <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+
+vec.pop().unwrap();
+<span class="macro">assert_eq!</span>(vec.len(), <span class="number">2</span>);
 
 vec.push(<span class="number">4</span>).unwrap();
-vec.push(<span class="number">5</span>).unwrap();
-vec.push(<span class="number">6</span>).unwrap();
 <span class="macro">assert_eq!</span>(vec.len(), <span class="number">3</span>);
-<span class="macro">assert_eq!</span>(vec.first(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));
+<span class="macro">assert_eq!</span>(vec.last(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">4</span>));
+
+<span class="macro">assert_eq!</span>(vec.as_slice(), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>]);
 
 <span class="kw">let </span>sum_of_even_numbers = vec.iter().filter(|n| <span class="kw-2">*</span>n % <span class="number">2 </span>== <span class="number">0</span>).sum::&lt;i32&gt;();
-<span class="macro">assert_eq!</span>(sum_of_even_numbers, <span class="number">10</span>);
+<span class="macro">assert_eq!</span>(sum_of_even_numbers, <span class="number">6</span>);
 
 vec.push(<span class="number">2</span>).unwrap_err();
 <span class="macro">assert_eq!</span>(vec.len(), <span class="number">3</span>);
@@ -56,7 +60,7 @@ vec.push(<span class="number">2</span>).unwrap_err();
 
 vec.clear();
 <span class="macro">assert!</span>(vec.is_empty());</code></pre></div>
-<p>See more examples in the documentation of <a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a>.</p>
+<p>See more examples in the <a href="https://andreiavrammsd.github.io/static_vector.rs/">documentation</a> of <a href="struct.Vec.html" title="struct static_vector::Vec"><code>Vec</code></a> and in <a href="https://github.com/andreiavrammsd/static_vector.rs/tree/master/examples">examples</a>.</p>
 <h3 id="development-on-linux"><a class="doc-anchor" href="#development-on-linux">§</a>Development on Linux</h3>
 <ul>
 <li>Install <a href="https://www.rust-lang.org/tools/install">Rust</a> (stable is used for main code, nightly is used only for code formatting and fuzz tests).</li>
