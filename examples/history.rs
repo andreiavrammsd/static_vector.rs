@@ -23,7 +23,8 @@ impl<const N: usize> EventHistory<N> {
     fn insert(&mut self, event: Event) {
         if self.events.is_full() {
             // Remove the oldest event (FIFO)
-            self.events.as_mut_slice().copy_within(1..N, 0);
+            let len = self.events.len();
+            self.events.as_mut_slice().copy_within(1..len, 0);
 
             // Can ignore the error here since we are guaranteed to have at least one element
             // because the vector is full.
