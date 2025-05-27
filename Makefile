@@ -1,8 +1,8 @@
 .SILENT:
-.PHONY: fuzz
+.PHONY: fuzz examples
 
 # VS Code: Ctrl+Shift+B
-all: test fmt lint build-doc
+all: test fmt lint build-doc examples
 
 test:
 	cargo test
@@ -37,6 +37,11 @@ build-doc:
 fuzz:
 	cargo +nightly fuzz run static_vector
 
+examples:
+	for ex in $$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[].targets[] | select(.kind[] == "example") | .name'); do \
+		cargo run --example $$ex; \
+	done
+
 dev:
 	echo Installing pre-commit hook...
 	curl -1sLf 'https://dl.cloudsmith.io/public/evilmartians/lefthook/setup.deb.sh' | sudo -E bash
@@ -50,6 +55,9 @@ dev:
 
 	echo Installing cargo-fuzz...
 	cargo install cargo-fuzz
+
+	echo Installing jq...
+	sudo apt install jq -y
 
 deny-commit-on-master:
 ifeq ($(shell git symbolic-ref --short HEAD),master)
