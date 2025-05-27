@@ -1,4 +1,4 @@
-/// Creates new vector.
+/// Creates a new `static_vector::Vec`, optionally empty, with specific elements, or default-initialized.
 ///
 /// # Forms
 ///
