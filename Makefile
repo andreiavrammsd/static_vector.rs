@@ -56,6 +56,9 @@ dev:
 	echo Installing cargo-fuzz...
 	cargo install cargo-fuzz
 
+	echo Installing jq...
+	sudo apt install jq -y
+
 deny-commit-on-master:
 ifeq ($(shell git symbolic-ref --short HEAD),master)
 	$(error Direct commits to 'master' are not allowed.)
