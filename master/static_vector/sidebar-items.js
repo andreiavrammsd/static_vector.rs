@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CapacityError","Iter","IterMut","Vec"]};
+window.SIDEBAR_ITEMS = {"macro":["vec"],"struct":["CapacityError","Iter","IterMut","Vec"]};
