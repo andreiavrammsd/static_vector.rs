@@ -78,6 +78,14 @@ mod tests {
     }
 
     #[test]
+    fn vec_with_one_element() {
+        let vec = vec![999];
+        assert_eq!(vec.capacity(), 1);
+        assert_eq!(vec.len(), 1);
+        assert_eq!(vec.as_slice(), &[999]);
+    }
+
+    #[test]
     fn vec_with_elements() {
         let vec = vec![1, 2, 3];
         assert_eq!(vec.capacity(), 3);
@@ -108,7 +116,15 @@ mod tests {
     }
 
     #[test]
-    fn vec_with_capacity_and_length_when_length_is_equal_to_capacity() {
+    fn vec_with_capacity_and_length_zero() {
+        let vec = vec![i32; 10; 0];
+        assert_eq!(vec.capacity(), 10);
+        assert!(vec.is_empty());
+        assert_eq!(vec.as_slice(), &[]);
+    }
+
+    #[test]
+    fn vec_with_capacity_and_length_equal_to_capacity() {
         let vec = vec![i32; 3; 3];
         assert_eq!(vec.capacity(), 3);
         assert_eq!(vec.len(), 3);
@@ -117,7 +133,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "length is less than or equal to capacity: CapacityError")]
-    fn vec_with_capacity_and_length_when_length_is_greater_than_capacity() {
+    fn vec_with_capacity_and_length_greater_than_capacity() {
         let _ = vec![i32; 10; 30];
     }
 }
