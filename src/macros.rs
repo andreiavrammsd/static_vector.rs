@@ -1,46 +1,37 @@
-/// Creates a new `static_vector::Vec`, optionally empty, with specific elements, or default-initialized.
+#[macro_export]
+/// A macro for creating a static vector (`Vec`) with various initialization patterns.
 ///
-/// # Forms
+/// # Usage
 ///
-/// - `vec![T; CAPACITY]`: Creates an empty `Vec<T, CAPACITY>` with maximum `CAPACITY` elements of type `T`.
-/// - `vec![x, y, z]`: Creates a `Vec` initialized with the given values. The capacity is inferred from the number of elements.
-/// - `vec![CAPACITY; x, y, z]`: Creates a `Vec` with given `CAPACITY`, initialized with the given values.
-/// - `vec![T; CAPACITY; LENGTH]`: Creates a `Vec<T, CAPACITY>` with maximum `CAPACITY` elements of type `T` and initialized with default `LENGTH` elements.
+/// - `vec![Type; CAPACITY]`
+///   - Creates an empty static vector of the specified type and capacity.
+///   - Example: `vec![u32; 8]`
+///
+/// - `vec![value1, value2, ..., valueN]`
+///   - Creates a static vector with the given values, inferring the type and capacity from the values.
+///   - Example: `vec![1, 2, 3]`
+///
+/// - `vec![CAPACITY; value1, value2, ..., valueN]`
+///   - Creates a static vector with the specified capacity and initializes it with the given values.
+///   - Example: `vec![8; 1, 2, 3]`
+///
+/// - `vec![Type; CAPACITY; Length]`
+///   - Creates a static vector of the specified type and capacity, and sets its length to `Length`.
+///   - Example: `vec![u32; 8; 4]`
 ///
 /// # Panics
 ///
-/// - If `CAPACITY == 0`. Zero-capacity vectors are not supported.
-/// - If the number of elements used to initialize the vector is larger than the given `CAPACITY`.
-/// - If the given initial `LENGTH` is larger than the given `CAPACITY`.
+/// Panics if the specified capacity is zero, or the number of provided values exceeds the capacity, or the requested length is greater than the capacity.
 ///
 /// # Examples
 ///
-/// Create an empty vector with capacity:
-///
 /// ```rust
-/// let vec = static_vector::vec![i32; 10];
-/// assert!(vec.is_empty());
+/// use static_vector::vec;
+/// let vec = vec![u8; 4]; // Empty vector with capacity 4
+/// let vec = vec![1, 2, 3]; // Vector with 3 elements
+/// let vec = vec![4; 1, 2]; // Vector with capacity 4, initialized with 2 elements
+/// let vec = vec![u16; 8; 5]; // Vector with capacity 8, length set to 5, initialized with zeros
 /// ```
-///
-/// Create a vector from elements:
-///
-/// ```rust
-/// let vec = static_vector::vec![1, 2, 3];
-/// assert_eq!(vec.as_slice(), &[1, 2, 3]);
-/// ```
-///
-/// Create a vector with a specific capacity and elements:
-/// ```rust
-/// let vec = static_vector::vec![10; 1, 2, 3];
-/// assert_eq!(vec.as_slice(), &[1, 2, 3]);
-/// ```
-///
-/// Create a vector with a specific type, capacity, length, and default values:
-/// ```rust
-/// let vec = static_vector::vec![i32; 10; 3];
-/// assert_eq!(vec.as_slice(), &[0, 0, 0]);
-/// ```
-#[macro_export]
 macro_rules! vec {
     ($type:ty; $capacity:literal) => {
         $crate::Vec::<$type, $capacity>::new()
