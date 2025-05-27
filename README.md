@@ -47,18 +47,22 @@ This crate is not published on [crates.io](https://crates.io/).
 ## Example
 
 ```rust
-use static_vector::Vec;
+use static_vector::vec;
 
-let mut vec = Vec::<i32, 3>::new();
+// Create a static vector with capacity 3, length 3, and elements 1, 2, 3.
+let mut vec = vec![1, 2, 3];
+
+vec.pop().unwrap();
+assert_eq!(vec.len(), 2);
 
 vec.push(4).unwrap();
-vec.push(5).unwrap();
-vec.push(6).unwrap();
 assert_eq!(vec.len(), 3);
-assert_eq!(vec.first(), Some(&4));
+assert_eq!(vec.last(), Some(&4));
+
+assert_eq!(vec.as_slice(), &[1, 2, 4]);
 
 let sum_of_even_numbers = vec.iter().filter(|n| *n % 2 == 0).sum::<i32>();
-assert_eq!(sum_of_even_numbers, 10);
+assert_eq!(sum_of_even_numbers, 6);
 
 vec.push(2).unwrap_err();
 assert_eq!(vec.len(), 3);
@@ -72,7 +76,7 @@ vec.clear();
 assert!(vec.is_empty());
 ```
 
-See more examples in the documentation of [`Vec`].
+See more examples in the [documentation](https://andreiavrammsd.github.io/static_vector.rs/) of [`Vec`] and in [examples](https://github.com/andreiavrammsd/static_vector.rs/tree/master/examples).
 
 ## Development on Linux
 
