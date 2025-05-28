@@ -59,6 +59,11 @@ dev:
 	echo Installing jq...
 	sudo apt install jq -y
 
+	# Details: https://github.com/Canop/bacon
+	# Usage: bacon
+	echo Installing bacon...
+	cargo install --locked bacon
+
 deny-commit-on-master:
 ifeq ($(shell git symbolic-ref --short HEAD),master)
 	$(error Direct commits to 'master' are not allowed.)
