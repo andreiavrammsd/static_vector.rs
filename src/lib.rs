@@ -8,7 +8,8 @@ mod macros;
 use core::mem::MaybeUninit;
 use core::{cmp, error, fmt, slice};
 
-/// Error for when the vector is full or the requested operation would need more space than the capacity.
+/// Error for when the vector is full or the requested operation would need more space than the
+/// capacity.
 ///
 /// See [`Vec::push()`] example for usage.
 #[derive(Debug)]
@@ -131,7 +132,6 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
 
     /// Returns whether the vector is at maximum capacity.
     ///
-    ///
     /// # Example
     ///
     /// ```rust
@@ -225,8 +225,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Requirements
     ///
-    /// - `T` must implement [`Default`] because new elements are created with `T::default()`
-    ///   when increasing the length.
+    /// - `T` must implement [`Default`] because new elements are created with `T::default()` when
+    ///   increasing the length.
     ///
     /// # Errors
     ///
@@ -310,7 +310,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         self.get(0)
     }
 
-    /// Returns a mutable reference to the first element in the vector, or [`None`] if the vector is empty.
+    /// Returns a mutable reference to the first element in the vector, or [`None`] if the vector is
+    /// empty.
     ///
     /// # Example
     ///
@@ -352,7 +353,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         if self.is_empty() { None } else { self.get(self.len() - 1) }
     }
 
-    /// Returns a mutable reference to the last element in the vector, or [`None`] if the vector is empty.
+    /// Returns a mutable reference to the last element in the vector, or [`None`] if the vector is
+    /// empty.
     ///
     /// # Example
     ///
@@ -405,7 +407,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         }
     }
 
-    /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of bounds.
+    /// Returns a mutable reference to the element at the specified `index`, or [`None`] if out of
+    /// bounds.
     ///
     /// # Example
     ///
@@ -475,8 +478,9 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         }
     }
 
-    /// Returns (and removes) the last element from the vector if the predicate returns true,
-    /// or [`None`] if the vector is empty or the predicate returns false.
+    /// Returns (and removes) the last element from the vector if the predicate returns true, or
+    /// [`None`] if the vector is empty or the predicate returns false.
+    ///
     /// # Example
     ///
     /// Similar to [`Vec::pop()`], but needs a predicate
@@ -591,7 +595,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`CapacityError`] if adding elements of given slice would result in vector exceeding its capacity.
+    /// Returns [`CapacityError`] if adding elements of given slice would result in vector exceeding
+    /// its capacity.
     ///
     /// # Example
     ///
@@ -645,7 +650,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     ///
     /// # Errors
     ///
-    /// Returns [`CapacityError`] if adding elements from `other` would result in current vector exceeding its capacity.
+    /// Returns [`CapacityError`] if adding elements from `other` would result in current vector
+    /// exceeding its capacity.
     ///
     /// # Example
     ///
@@ -688,8 +694,9 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
         self.length += 1;
     }
 
-    /// Drops all elements in given range. Needed when elements are considered to be going out of scope.
-    /// E.g.: when the vector is going out of scope, when methods such as [`Vec::clear()`] and [`Vec::set_len()`] are called.
+    /// Drops all elements in given range. Needed when elements are considered to be going out of
+    /// scope. E.g.: when the vector is going out of scope, when methods such as
+    /// [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
         for i in from..to {
             // SAFETY:
@@ -770,8 +777,8 @@ impl<'a, T> Iterator for Iter<'a, T> {
 }
 
 impl<'a, T: 'a, const CAPACITY: usize> IntoIterator for &'a Vec<T, CAPACITY> {
-    type Item = &'a T;
     type IntoIter = Iter<'a, T>;
+    type Item = &'a T;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -815,8 +822,8 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 
 impl<'a, T: 'a, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, CAPACITY> {
-    type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
+    type Item = &'a mut T;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()

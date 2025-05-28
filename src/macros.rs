@@ -8,11 +8,13 @@
 ///   - Example: `vec![u32; 8]`
 ///
 /// - `vec![value1, value2, ..., valueN]`
-///   - Creates a static vector with the given values, inferring the type and capacity from the values.
+///   - Creates a static vector with the given values, inferring the type and capacity from the
+///     values.
 ///   - Example: `vec![1, 2, 3]`
 ///
 /// - `vec![CAPACITY; value1, value2, ..., valueN]`
-///   - Creates a static vector with the specified capacity and initializes it with the given values.
+///   - Creates a static vector with the specified capacity and initializes it with the given
+///     values.
 ///   - Example: `vec![8; 1, 2, 3]`
 ///
 /// - `vec![Type; CAPACITY; Length]`
@@ -21,7 +23,8 @@
 ///
 /// # Panics
 ///
-/// Panics if the specified capacity is zero, or the number of provided values exceeds the capacity, or the requested length is greater than the capacity.
+/// Panics if the specified capacity is zero, or the number of provided values exceeds the capacity,
+/// or the requested length is greater than the capacity.
 ///
 /// # Examples
 ///
