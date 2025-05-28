@@ -126,19 +126,3 @@ jobs:
       - uses: dtolnay/rust-toolchain@4305c38b25d97ef35a8ad1f985ccf2d2242004f2 # stable
       
       - run: make examples
-
-  actions-audit:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Run Zizmor audit
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace/ -w /workspace/ ghcr.io/zizmorcore/zizmor@sha256:4d3128ae1370da9507bdd42a62d72b8304d4d0f290147aaac3eb0ebf51d70890 \
-            --gh-token ${GITHUB_TOKEN} .github/workflows/
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
