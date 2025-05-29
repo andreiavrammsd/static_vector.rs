@@ -2,5 +2,6 @@
     "recommendations": [
         "rust-lang.rust-analyzer",
         "ryanluker.vscode-coverage-gutters",
+        "cordx56.rustowl-vscode"
     ]
 }

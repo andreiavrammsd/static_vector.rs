@@ -16,11 +16,17 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   fuzz:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/cache@v4
         with:
@@ -30,24 +36,33 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@888c2e1ea69ab0d4330cbf0af1ecc7b68f368cc1
+        with:
+          toolchain: nightly
 
       - name: Set seconds to run tests
         id: fuzz_config
+        env:
+          SECONDS: ${{ inputs.fuzzseconds }}
+          EVENT: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ]; then
+          seconds="${SECONDS}"
+          if ! [[ "$seconds" =~ ^[0-9]+$ ]] || (( seconds < 0 || seconds > 600 )); then
+            echo "Invalid fuzzseconds input; using default 30"
+            seconds=30
+          fi
+
+          if [ "${EVENT}" = "schedule" ]; then
             echo "fuzzseconds=600" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            val="${{ inputs.fuzzseconds }}"
-            if [ -z "$val" ]; then
-              val=30
-            fi
-            echo "fuzzseconds=$val" >> "$GITHUB_OUTPUT"
+          elif [ "${EVENT}" = "workflow_dispatch" ]; then
+            echo "fuzzseconds=$seconds" >> "$GITHUB_OUTPUT"
           else
             echo "fuzzseconds=30" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run tests
+        env:
+          SECONDS: ${{ steps.fuzz_config.outputs.fuzzseconds }}
         run: |
           cargo install cargo-fuzz
-          cargo +nightly fuzz run static_vector -- -max_total_time=${{ steps.fuzz_config.outputs.fuzzseconds }}
+          cargo +nightly fuzz run static_vector -- -max_total_time=${SECONDS}
