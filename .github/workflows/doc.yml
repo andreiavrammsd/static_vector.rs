@@ -23,15 +23,21 @@ jobs:
 
     env:
       BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || (github.ref_name == '' && 'master' || github.ref_name) }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@4305c38b25d97ef35a8ad1f985ccf2d2242004f2 # stable
+
+      - uses: dtolnay/rust-toolchain@888c2e1ea69ab0d4330cbf0af1ecc7b68f368cc1
+        with:
+          toolchain: stable
+
       - run: |
           .github/doc/doc.py ${BRANCH_NAME}
           ls -l ./target/docs
+
       - uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
