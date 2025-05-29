@@ -42,9 +42,12 @@ jobs:
 
       - name: Set seconds to run tests
         id: fuzz_config
+        env:
+          SECONDS: ${{ inputs.fuzzseconds }}
+          EVENT: ${{ github.event_name }}
         run: |
           seconds="${SECONDS}"
-          if ! [[ "$seconds" =~ ^[0-9]+$ ]]; then
+          if ! [[ "$seconds" =~ ^[0-9]+$ ]] || (( seconds < 0 || seconds > 600 )); then
             echo "Invalid fuzzseconds input; using default 30"
             seconds=30
           fi
@@ -56,13 +59,10 @@ jobs:
           else
             echo "fuzzseconds=30" >> "$GITHUB_OUTPUT"
           fi
-        env:
-          SECONDS: ${{ inputs.fuzzseconds }}
-          EVENT: ${{ github.event_name }}
 
       - name: Run tests
+        env:
+          SECONDS: ${{ steps.fuzz_config.outputs.fuzzseconds }}
         run: |
           cargo install cargo-fuzz
           cargo +nightly fuzz run static_vector -- -max_total_time=${SECONDS}
-        env:
-          SECONDS: ${{ steps.fuzz_config.outputs.fuzzseconds }}

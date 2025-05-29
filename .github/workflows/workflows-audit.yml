@@ -24,9 +24,8 @@ jobs:
           persist-credentials: false
 
       - name: Run Zizmor audit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker run --rm -v ${{ github.workspace }}:/workspace/ -w /workspace/ ghcr.io/zizmorcore/zizmor@sha256:4d3128ae1370da9507bdd42a62d72b8304d4d0f290147aaac3eb0ebf51d70890 \
             -p --gh-token ${GITHUB_TOKEN} .github/workflows/
-
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

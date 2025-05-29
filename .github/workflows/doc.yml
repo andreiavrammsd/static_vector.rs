@@ -11,15 +11,12 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
 
     env:
       BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || (github.ref_name == '' && 'master' || github.ref_name) }}
