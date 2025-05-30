@@ -1,4 +1,4 @@
-name: CI
+name: Workflows Audit
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   actions: read
 
 jobs:
-  workflows-audit:
+  audit:
     runs-on: ubuntu-latest
 
     steps:

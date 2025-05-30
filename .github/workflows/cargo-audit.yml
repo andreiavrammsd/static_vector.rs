@@ -1,4 +1,4 @@
-name: CI
+name: Cargo Audit
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   actions: read
 
 jobs:
-  cargo-audit:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
