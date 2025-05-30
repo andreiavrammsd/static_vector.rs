@@ -1,6 +1,10 @@
 {
     "recommendations": [
         "rust-lang.rust-analyzer",
+        "vadimcn.vscode-lldb",
+        "tamasfe.even-better-toml",
+        "usernamehw.errorlens",
+        "fill-labs.dependi",
         "ryanluker.vscode-coverage-gutters",
         "cordx56.rustowl-vscode"
     ]
