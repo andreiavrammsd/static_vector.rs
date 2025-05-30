@@ -28,6 +28,5 @@ jobs:
             ~/.cargo
           key: ${{ runner.os }}-cargo-audit-${{ hashFiles('**/Cargo.toml') }}
 
-      - run: |
-          cargo install cargo-audit
-          cargo audit --deny=warnings
+      - run: cargo install cargo-audit
+      - run: cargo audit --deny=warnings
