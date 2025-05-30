@@ -172,5 +172,4 @@ trybuild = "1.0.105"
 
 [[bench]]
 name = "static_vector"
-
 harness = false
