@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["static_vector",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.99.1/core/marker/trait.UnsafeUnpin.html\" title=\"trait core::marker::UnsafeUnpin\">UnsafeUnpin</a> for <a class=\"struct\" href=\"static_vector/struct.CapacityError.html\" title=\"struct static_vector::CapacityError\">CapacityError</a>",0,1,["static_vector::CapacityError"]],["impl&lt;'a, T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.99.1/core/marker/trait.UnsafeUnpin.html\" title=\"trait core::marker::UnsafeUnpin\">UnsafeUnpin</a> for <a class=\"struct\" href=\"static_vector/struct.Iter.html\" title=\"struct static_vector::Iter\">Iter</a>&lt;'a, T&gt;",0,1,["static_vector::Iter"]],["impl&lt;'a, T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.99.1/core/marker/trait.UnsafeUnpin.html\" title=\"trait core::marker::UnsafeUnpin\">UnsafeUnpin</a> for <a class=\"struct\" href=\"static_vector/struct.IterMut.html\" title=\"struct static_vector::IterMut\">IterMut</a>&lt;'a, T&gt;",0,1,["static_vector::IterMut"]],["impl&lt;T, const CAPACITY: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.99.1/core/primitive.usize.html\">usize</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.99.1/core/marker/trait.UnsafeUnpin.html\" title=\"trait core::marker::UnsafeUnpin\">UnsafeUnpin</a> for <a class=\"struct\" href=\"static_vector/struct.Vec.html\" title=\"struct static_vector::Vec\">Vec</a>&lt;T, CAPACITY&gt;<div class=\"where\">where\n    T: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.99.1/core/marker/trait.UnsafeUnpin.html\" title=\"trait core::marker::UnsafeUnpin\">UnsafeUnpin</a>,</div>",0,1,["static_vector::Vec"]]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[1660]}
