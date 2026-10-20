@@ -44,7 +44,7 @@ examples:
 
 dev:
 	echo Installing pre-commit hook...
-	curl -1sLf 'https://dl.cloudsmith.io/public/evilmartians/lefthook/setup.deb.sh' | sudo -E bash
+	curl -1sLf 'https://dl.cloudsmith.io/public/evilmartians/lefthook/setup.deb.sh' | sudo bash
 	sudo apt install lefthook
 	lefthook install
 
