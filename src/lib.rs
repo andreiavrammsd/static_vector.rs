@@ -700,12 +700,12 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// scope. E.g.: when the vector is going out of scope, when methods such as
     /// [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
-        for i in from..to {
+        for element in &mut self.data[from..to] {
             // SAFETY:
             // - `i` is within bounds of `self.data`.
             // - The element at `i` has been initialized.
             unsafe {
-                self.data[i].assume_init_drop();
+                element.assume_init_drop();
             }
         }
     }
