@@ -217,8 +217,9 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     #[inline]
     #[doc(alias("reset", "remove", "truncate", "empty"))]
     pub fn clear(&mut self) {
-        self.drop_range(0, self.length);
+        let length = self.length;
         self.length = 0;
+        self.drop_range(0, length);
     }
 
     /// Resizes the vector to the `new_length`.
@@ -278,8 +279,9 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
                 self.push_unchecked(T::default());
             }
         } else {
-            self.drop_range(new_length, self.length);
+            let old_length = self.length;
             self.length = new_length;
+            self.drop_range(new_length, old_length);
         }
 
         Ok(())
@@ -698,12 +700,12 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     /// scope. E.g.: when the vector is going out of scope, when methods such as
     /// [`Vec::clear()`] and [`Vec::set_len()`] are called.
     fn drop_range(&mut self, from: usize, to: usize) {
-        for i in from..to {
+        for element in &mut self.data[from..to] {
             // SAFETY:
             // - `i` is within bounds of `self.data`.
             // - The element at `i` has been initialized.
             unsafe {
-                self.data[i].assume_init_drop();
+                element.assume_init_drop();
             }
         }
     }
@@ -836,9 +838,12 @@ mod tests {
 
     extern crate alloc;
     extern crate std;
+    use alloc::boxed::Box;
     use alloc::format;
     use core::cell::Cell;
     use core::error::Error;
+    use core::panic::AssertUnwindSafe;
+    use std::panic::{catch_unwind, resume_unwind};
     use std::thread_local;
 
     fn assert_is_core_error<T: Error>() {}
@@ -1022,6 +1027,21 @@ mod tests {
     }
 
     #[test]
+    fn clear_should_not_drop_elements_twice_if_drop_panics() {
+        PANIC_DROPS.set(0);
+        PANIC_ON_DROP.set(true);
+
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            let mut vec = Vec::<PanicOnDrop, 1>::new();
+            vec.push(PanicOnDrop).unwrap();
+            vec.clear();
+        }));
+
+        assert!(result.is_err());
+        assert_eq!(PANIC_DROPS.get(), 1);
+    }
+
+    #[test]
     fn set_len() {
         let mut vec = Vec::<i32, 3>::new();
 
@@ -1118,6 +1138,21 @@ mod tests {
 
         assert_eq!(CLONES.get(), 5); // the five clones before push
         assert_eq!(DEFAULTS.get(), 0);
+    }
+
+    #[test]
+    fn set_len_should_not_drop_elements_twice_if_drop_panics() {
+        PANIC_DROPS.set(0);
+        PANIC_ON_DROP.set(true);
+
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            let mut vec = Vec::<PanicOnDrop, 2>::new();
+            vec.set_len(2).unwrap();
+            vec.set_len(1).unwrap();
+        }));
+
+        assert!(result.is_err());
+        assert_eq!(PANIC_DROPS.get(), 2);
     }
 
     #[test]
@@ -1576,6 +1611,8 @@ mod tests {
         static DEFAULTS: Cell<usize> = const {Cell::new(0)};
         static CLONES: Cell<usize> = const {Cell::new(0)};
         static DROPS: Cell<usize> = const {Cell::new(0)};
+        static PANIC_DROPS: Cell<usize> = const {Cell::new(0)};
+        static PANIC_ON_DROP: Cell<bool> = const {Cell::new(false)};
     }
 
     impl Default for Struct {
@@ -1595,6 +1632,24 @@ mod tests {
     impl Drop for Struct {
         fn drop(&mut self) {
             DROPS.set(DROPS.get() + 1);
+        }
+    }
+
+    struct PanicOnDrop;
+
+    impl Default for PanicOnDrop {
+        fn default() -> Self {
+            Self
+        }
+    }
+
+    impl Drop for PanicOnDrop {
+        fn drop(&mut self) {
+            PANIC_DROPS.set(PANIC_DROPS.get() + 1);
+            if PANIC_ON_DROP.get() {
+                PANIC_ON_DROP.set(false);
+                resume_unwind(Box::new("drop"));
+            }
         }
     }
 
