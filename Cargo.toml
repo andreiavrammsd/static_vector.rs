@@ -13,9 +13,6 @@ keywords = ["vector"]
 categories = ["data-structures", "no-std"]
 publish = false
 
-[features]
-capacity-zero-compile-test = []
-
 [profile.dev]
 overflow-checks = true
 lto = false
@@ -169,8 +166,8 @@ verbose_file_reads = "forbid"
 wildcard_enum_match_arm = "forbid"
 
 [dev-dependencies]
-criterion = "0.6.0"
-trybuild = "1.0.105"
+criterion = "0.8.2"
+trybuild = "1.0.125"
 
 [[bench]]
 name = "static_vector"

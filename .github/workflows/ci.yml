@@ -67,7 +67,7 @@ jobs:
 
       - run: cargo test --profile ${{ matrix.profile }}
       - if: matrix.compile_tests
-        run: cargo test --profile ${{ matrix.profile }} --features capacity-zero-compile-test --test compile_tests
+        run: cargo test --profile ${{ matrix.profile }}
 
   format:
     runs-on: ubuntu-latest
