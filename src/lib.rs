@@ -839,6 +839,26 @@ impl<'a, T: 'a, const CAPACITY: usize> IntoIterator for &'a mut Vec<T, CAPACITY>
     }
 }
 
+/// Compile-time guarantees
+///
+/// Zero capacity is rejected when `new()` is evaluated in a const context:
+///
+/// ```compile_fail,E0080
+/// use static_vector::Vec;
+///
+/// const _: Vec<i32, 0> = Vec::new();
+/// ```
+///
+/// The same code with a non-zero capacity compiles:
+///
+/// ```
+/// use static_vector::Vec;
+///
+/// const _: Vec<i32, 1> = Vec::new();
+/// ```
+#[cfg(doctest)]
+mod compile_fail_tests {}
+
 #[cfg(test)]
 mod tests {
     use super::*;

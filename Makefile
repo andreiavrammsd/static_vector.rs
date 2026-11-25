@@ -7,9 +7,6 @@ all: test fmt lint build-doc examples
 test:
 	cargo test
 
-test-compile:
-	cargo test --features capacity-zero-compile-test --test compile_tests
-
 fmt:
 	cargo +nightly fmt --all -- --check || (cargo +nightly fmt --all && exit 1)
 
