@@ -21,12 +21,24 @@ jobs:
         include:
           - os: ubuntu-latest
             profile: dev
+            toolchain: 1.85.1
+            compile_tests: true
+          - os: ubuntu-latest
+            profile: dev
+            toolchain: stable
+            compile_tests: false
           - os: ubuntu-latest
             profile: release
+            toolchain: stable
+            compile_tests: false
           - os: windows-latest
             profile: release
+            toolchain: stable
+            compile_tests: false
           - os: macos-latest
             profile: release
+            toolchain: stable
+            compile_tests: false
 
     runs-on: ${{ matrix.os }}
 
@@ -45,10 +57,11 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
 
       - run: cargo test --profile ${{ matrix.profile }}
-      - run: cargo test --profile ${{ matrix.profile }} --features capacity-zero-compile-test --test compile_tests
+      - if: matrix.compile_tests
+        run: cargo test --profile ${{ matrix.profile }} --features capacity-zero-compile-test --test compile_tests
 
   format:
     runs-on: ubuntu-latest
@@ -136,3 +149,19 @@ jobs:
           toolchain: stable
 
       - run: make examples
+
+  gate:
+    name: gate
+    needs: [test, format, clippy, coverage, examples]
+    if: ${{ always() }}
+    runs-on: ubuntu-slim
+    permissions: {}
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -qE 'failure|cancelled'; then
+            exit 1
+          fi

@@ -6,6 +6,8 @@ all: test fmt lint build-doc examples
 
 test:
 	cargo test
+
+test-compile:
 	cargo test --features capacity-zero-compile-test --test compile_tests
 
 fmt:
