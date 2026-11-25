@@ -48,6 +48,7 @@ jobs:
           toolchain: stable
 
       - run: cargo test --profile ${{ matrix.profile }}
+      - run: cargo test --profile ${{ matrix.profile }} --features capacity-zero-compile-test --test compile_tests
 
   format:
     runs-on: ubuntu-latest

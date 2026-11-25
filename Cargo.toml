@@ -13,6 +13,9 @@ keywords = ["vector"]
 categories = ["data-structures", "no-std"]
 publish = false
 
+[features]
+capacity-zero-compile-test = []
+
 [profile.dev]
 overflow-checks = true
 lto = false
