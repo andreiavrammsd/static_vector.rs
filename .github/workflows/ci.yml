@@ -15,18 +15,36 @@ permissions:
 
 jobs:
   test:
+    name: test ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - name: ubuntu-latest, dev, 1.85.1
+            os: ubuntu-latest
             profile: dev
-          - os: ubuntu-latest
+            toolchain: 1.85.1
+            compile_tests: true
+          - name: ubuntu-latest, dev, stable
+            os: ubuntu-latest
+            profile: dev
+            toolchain: stable
+            compile_tests: false
+          - name: ubuntu-latest, release, stable
+            os: ubuntu-latest
             profile: release
-          - os: windows-latest
+            toolchain: stable
+            compile_tests: false
+          - name: windows-latest, release, stable
+            os: windows-latest
             profile: release
-          - os: macos-latest
+            toolchain: stable
+            compile_tests: false
+          - name: macos-latest, release, stable
+            os: macos-latest
             profile: release
+            toolchain: stable
+            compile_tests: false
 
     runs-on: ${{ matrix.os }}
 
@@ -45,9 +63,11 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
-          toolchain: stable
+          toolchain: ${{ matrix.toolchain }}
 
       - run: cargo test --profile ${{ matrix.profile }}
+      - if: matrix.compile_tests
+        run: cargo test --profile ${{ matrix.profile }} --features capacity-zero-compile-test --test compile_tests
 
   format:
     runs-on: ubuntu-latest
@@ -135,3 +155,19 @@ jobs:
           toolchain: stable
 
       - run: make examples
+
+  gate:
+    name: gate
+    needs: [test, format, clippy, coverage, examples]
+    if: ${{ always() }}
+    runs-on: ubuntu-slim
+    permissions: {}
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -qE 'failure|cancelled'; then
+            exit 1
+          fi

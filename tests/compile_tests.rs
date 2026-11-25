@@ -2,6 +2,7 @@
 #[test]
 fn compile() {
     let t = trybuild::TestCases::new();
-    t.compile_fail("tests/cases/capacity_zero.rs"); // Fails on newer versions of Rust due to diagnostic message changes
+    #[cfg(feature = "capacity-zero-compile-test")]
+    t.compile_fail("tests/cases/capacity_zero.rs");
     t.compile_fail("tests/cases/must_use.rs");
 }

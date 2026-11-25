@@ -678,12 +678,19 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     pub fn append<const OTHER_CAPACITY: usize>(
         &mut self,
         other: &mut Vec<T, OTHER_CAPACITY>,
-    ) -> Result<(), CapacityError>
-    where
-        T: Clone,
-    {
-        self.extend_from_slice(other.as_slice())?;
-        other.clear();
+    ) -> Result<(), CapacityError> {
+        if other.len() > CAPACITY - self.len() {
+            return Err(CapacityError);
+        }
+
+        let other_length = other.length;
+        for element in other.data.iter_mut().take(other_length) {
+            // SAFETY:
+            // - Only initialized elements in `other` are read.
+            let value = unsafe { element.assume_init_read() };
+            self.push_unchecked(value);
+        }
+        other.length = 0;
 
         Ok(())
     }
@@ -702,8 +709,8 @@ impl<T, const CAPACITY: usize> Vec<T, CAPACITY> {
     fn drop_range(&mut self, from: usize, to: usize) {
         for element in &mut self.data[from..to] {
             // SAFETY:
-            // - `i` is within bounds of `self.data`.
-            // - The element at `i` has been initialized.
+            // - The element is within `self.data`.
+            // - The element has been initialized.
             unsafe {
                 element.assume_init_drop();
             }
@@ -1518,6 +1525,21 @@ mod tests {
     }
 
     #[test]
+    fn append_moves_non_clone_elements() {
+        let mut vec = Vec::<NonClone, 5>::new();
+        vec.push(NonClone(1)).unwrap();
+
+        let mut other = Vec::<NonClone, 5>::new();
+        other.push(NonClone(2)).unwrap();
+        other.push(NonClone(3)).unwrap();
+
+        vec.append(&mut other).unwrap();
+
+        assert_eq!(vec.as_slice(), &[NonClone(1), NonClone(2), NonClone(3)]);
+        assert!(other.is_empty());
+    }
+
+    #[test]
     fn append_with_not_enough_room() {
         let mut vec = Vec::<i32, 2>::new();
         vec.push(1).unwrap();
@@ -1606,6 +1628,9 @@ mod tests {
     struct Struct {
         i: i32,
     }
+
+    #[derive(Debug, PartialEq)]
+    struct NonClone(i32);
 
     thread_local! {
         static DEFAULTS: Cell<usize> = const {Cell::new(0)};
