@@ -15,27 +15,33 @@ permissions:
 
 jobs:
   test:
+    name: test ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - name: ubuntu-latest, dev, 1.85.1
+            os: ubuntu-latest
             profile: dev
             toolchain: 1.85.1
             compile_tests: true
-          - os: ubuntu-latest
+          - name: ubuntu-latest, dev, stable
+            os: ubuntu-latest
             profile: dev
             toolchain: stable
             compile_tests: false
-          - os: ubuntu-latest
+          - name: ubuntu-latest, release, stable
+            os: ubuntu-latest
             profile: release
             toolchain: stable
             compile_tests: false
-          - os: windows-latest
+          - name: windows-latest, release, stable
+            os: windows-latest
             profile: release
             toolchain: stable
             compile_tests: false
-          - os: macos-latest
+          - name: macos-latest, release, stable
+            os: macos-latest
             profile: release
             toolchain: stable
             compile_tests: false
