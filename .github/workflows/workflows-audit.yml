@@ -5,10 +5,10 @@ on:
     branches:
       - master
     paths:
-      - '.github/**'
+      - ".github/**"
   pull_request:
     paths:
-      - '.github/**'
+      - ".github/**"
 
 permissions:
   contents: read
@@ -19,13 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Run Zizmor audit
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace/ -w /workspace/ ghcr.io/zizmorcore/zizmor@sha256:4d3128ae1370da9507bdd42a62d72b8304d4d0f290147aaac3eb0ebf51d70890 \
-            -p --gh-token ${GITHUB_TOKEN} .github/workflows/
+      - name: Run Zizmor
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          advanced-security: false
