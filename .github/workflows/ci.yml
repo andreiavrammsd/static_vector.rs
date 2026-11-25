@@ -168,6 +168,6 @@ jobs:
           RESULTS: ${{ toJSON(needs.*.result) }}
         run: |
           echo "$RESULTS"
-          if echo "$RESULTS" | grep -qE 'failure|cancelled'; then
+          if echo "$RESULTS" | grep -qE 'failure|cancelled|abandoned'; then
             exit 1
           fi
